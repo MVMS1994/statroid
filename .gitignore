@@ -65,3 +65,4 @@ freeline_project_description.json
 /captures
 .externalNativeBuild
 keystore.properties
+app/src/main/res/values/fabric.xml

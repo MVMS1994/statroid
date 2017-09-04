@@ -57,25 +57,31 @@ public class StatsService extends Service implements Runnable {
                 NotificationManager.showNotification(data, this);
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Logger.e(TAG, "This Happened: ", e);
         }
     }
 
 
     private static int cpuinfo() {
-        String rawTop = SystemUtils.runADB("top -n 1 -m 1");
-        rawTop = rawTop.substring(0, rawTop.indexOf("User", 4));
+        try {
+            String rawTop = SystemUtils.runADB("top -n 1 -m 1");
+            rawTop = rawTop.substring(0, rawTop.indexOf("User", 4));
 
-        String[] entities = rawTop.split(",");
-        int total = 0;
-        for(String entity: entities) {
-            String[] row = entity.split(" ");
-            int percent = Integer.parseInt(row[row.length - 1].replace("%", ""));
-            total += percent;
+            String[] entities = rawTop.split(",");
+            int total = 0;
+            for (String entity : entities) {
+                String[] row = entity.split(" ");
+                int percent = Integer.parseInt(row[row.length - 1].replace("%", ""));
+                total += percent;
+            }
+            Logger.d(TAG, "CPU Used - " + total);
+
+
+            return total;
+        } catch (Exception e) {
+            Logger.e(TAG, "This Happened: ", e);
         }
-        Logger.d(TAG, "CPU Used - " + total);
-
-        return total;
+        return 0;
     }
 
     private static double raminfo(Context context) {

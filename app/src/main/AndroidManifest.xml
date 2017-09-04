@@ -22,6 +22,9 @@
             </intent-filter>
         </activity>
         <service android:name="subbiah.veera.statroid.core.StatsService" />
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="@string/fabric_api_key" />
     </application>
 
 </manifest>
