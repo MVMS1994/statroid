@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.widget.RemoteViews;
@@ -33,6 +34,14 @@ public class NotificationManager {
         remoteViews.setTextViewText(R.id.ram, data.getRam());
         remoteViews.setTextViewText(R.id.bat, data.getBat());
 
+        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+            int padding = SystemUtils.dpToPx(16);
+            remoteViews.setViewPadding(R.id.notification, padding, padding, padding, padding);
+        } else {
+            int padding = SystemUtils.dpToPx(16);
+            remoteViews.setViewPadding(R.id.notification, padding, 0, padding, 0);
+        }
+
 
         if(!builders.containsKey(data.getKey())) {
             int code = (int) (Math.random() * 100);
@@ -52,7 +61,7 @@ public class NotificationManager {
         }
 
         Notification mNotification = builders.get(data.getKey())
-                .setContent(remoteViews)
+                .setCustomContentView(remoteViews)
                 .build();
         mNotification.flags |= Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
 

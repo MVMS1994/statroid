@@ -3,7 +3,9 @@ package subbiah.veera.statroid.core;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.net.wifi.WifiManager;
+import android.util.DisplayMetrics;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -82,5 +84,12 @@ public class SystemUtils {
             Logger.e(TAG, "This Happened: ", e);
         }
         return "";
+    }
+
+    @SuppressWarnings({"WeakerAccess", "SameParameterValue"})
+    public static int dpToPx(int dp) {
+        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+        float px = dp * (metrics.densityDpi / 160f);
+        return Math.round(px);
     }
 }
