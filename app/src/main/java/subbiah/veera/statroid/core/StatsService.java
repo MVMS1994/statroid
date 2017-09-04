@@ -5,6 +5,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.TrafficStats;
 import android.os.BatteryManager;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -24,6 +25,7 @@ public class StatsService extends Service implements Runnable {
 
     private boolean shouldStop = false;
     private Intent batteryStatus;
+    private long prevNetwork;
 
     @Override
     public void onCreate() {
@@ -31,6 +33,7 @@ public class StatsService extends Service implements Runnable {
 
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         batteryStatus = registerReceiver(null, ifilter);
+        prevNetwork = -1;
 
         new Thread(this).start();
     }
@@ -62,7 +65,7 @@ public class StatsService extends Service implements Runnable {
                         .setKey("stats")
                         .setCpu(cpuinfo())
                         .setRam(raminfo(this))
-                        .setNetwork("NA")
+                        .setNetwork(netinfo())
                         .setBat(batteryinfo());
                 NotificationManager.showNotification(data, this);
             }
@@ -71,11 +74,39 @@ public class StatsService extends Service implements Runnable {
         }
     }
 
+    private String netinfo() {
+        long total = TrafficStats.getTotalRxBytes() + TrafficStats.getTotalTxBytes();
+        if(prevNetwork == -1) {
+            prevNetwork = total;
+            return 0 + " KB/s";
+        }
+        double answer = total - prevNetwork;
+        prevNetwork = total;
+
+        final long KB = 1024, MB = KB * 1024, GB = MB * 1024;
+        String unit = " B/s";
+        if (answer >= GB) {
+            answer /= GB;
+            unit = " GB/s";
+        } else if (answer >= MB) {
+            answer /= MB;
+            unit = " MB/s";
+        } else if (answer >= KB) {
+            answer /= KB;
+            unit = " KB/s";
+        }
+
+        Logger.d(TAG, "Net Used - " + round(answer, 1) + unit);
+        return round(answer, 1) + unit;
+    }
+
     private String batteryinfo() {
         int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+        String total = round((level * 100) / (float)scale, 2);
 
-        return round((level * 100) / (float)scale, 2);
+        Logger.d(TAG, "Battery Used - " + total);
+        return total;
     }
 
 
