@@ -9,6 +9,8 @@ import android.os.BatteryManager;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
+import java.math.BigDecimal;
+
 import subbiah.veera.statroid.data.Data;
 import subbiah.veera.statroid.data.Logger;
 
@@ -69,11 +71,11 @@ public class StatsService extends Service implements Runnable {
         }
     }
 
-    private double batteryinfo() {
+    private String batteryinfo() {
         int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 
-        return round(level / (float)scale, 2) * 100;
+        return round((level * 100) / (float)scale, 2);
     }
 
 
@@ -99,22 +101,18 @@ public class StatsService extends Service implements Runnable {
         return 0;
     }
 
-    private static double raminfo(Context context) {
+    private static String raminfo(Context context) {
         ActivityManager actManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
         actManager.getMemoryInfo(memInfo);
-        double total = round(memInfo.availMem / (1024 * 1024 * 1024.0), 2);
+        String total = round(memInfo.availMem / (1024 * 1024 * 1024.0), 2);
         Logger.d(TAG, "RAM Used - " + total);
 
         return total;
     }
 
     @SuppressWarnings("SameParameterValue")
-    private static double round(double val, int places) {
-        if(places == 0) return val;
-
-        val *= Math.pow(10, places);
-        val = Math.round(val);
-        return val/Math.pow(10, places);
+    private static String round(double val, int places) {
+        return new BigDecimal(val).setScale(places, BigDecimal.ROUND_HALF_DOWN).toString();
     }
 }

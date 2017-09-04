@@ -25,8 +25,8 @@ public class Data {
         return ram;
     }
 
-    public Data setRam(double ram) {
-        this.ram = String.valueOf(ram) + " GB";
+    public Data setRam(String ram) {
+        this.ram = ram + " GB";
         return this;
     }
 
@@ -61,8 +61,8 @@ public class Data {
         return bat;
     }
 
-    public Data setBat(double bat) {
-        this.bat = String.valueOf(bat) + "%";
+    public Data setBat(String bat) {
+        this.bat = bat + "%";
         return this;
     }
 }
