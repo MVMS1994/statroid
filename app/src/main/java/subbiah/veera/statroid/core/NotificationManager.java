@@ -31,6 +31,7 @@ public class NotificationManager {
         remoteViews.setTextViewText(R.id.net, data.getNetwork());
         remoteViews.setTextViewText(R.id.cpu, data.getCpu());
         remoteViews.setTextViewText(R.id.ram, data.getRam());
+        remoteViews.setTextViewText(R.id.bat, data.getBat());
 
 
         if(!builders.containsKey(data.getKey())) {

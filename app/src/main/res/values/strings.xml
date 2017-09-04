@@ -4,4 +4,5 @@
     <string name="na">NA</string>
     <string name="net">NET</string>
     <string name="ram">RAM</string>
+    <string name="bat">Batt</string>
 </resources>

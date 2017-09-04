@@ -10,6 +10,15 @@ public class Data {
     private String cpu = "NA";
     private String ram = "NA";
     private String key = "NA";
+    private String bat = "NA";
+
+    @Override
+    public String toString() {
+        return "Network: " + getNetwork() + "\n" +
+                "CPU: " + getCpu() + "\n" +
+                "RAM: " + getRam() + "\n" +
+                "Battery: " + getBat();
+    }
 
 
     public String getRam() {
@@ -48,11 +57,12 @@ public class Data {
         return this;
     }
 
-    @Override
-    public String toString() {
-        return "Network: " + getNetwork() + "  " +
-               "CPU: " + getCpu() + "\n" +
-               "RAM: " + getRam();
+    public String getBat() {
+        return bat;
     }
 
+    public Data setBat(double bat) {
+        this.bat = String.valueOf(bat) + "%";
+        return this;
+    }
 }

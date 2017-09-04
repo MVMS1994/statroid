@@ -4,6 +4,8 @@ import android.app.ActivityManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.BatteryManager;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
@@ -19,10 +21,15 @@ public class StatsService extends Service implements Runnable {
     private static final String TAG = "StatsService";
 
     private boolean shouldStop = false;
+    private Intent batteryStatus;
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        batteryStatus = registerReceiver(null, ifilter);
+
         new Thread(this).start();
     }
 
@@ -53,12 +60,20 @@ public class StatsService extends Service implements Runnable {
                         .setKey("stats")
                         .setCpu(cpuinfo())
                         .setRam(raminfo(this))
-                        .setNetwork("NA");
+                        .setNetwork("NA")
+                        .setBat(batteryinfo());
                 NotificationManager.showNotification(data, this);
             }
         } catch (InterruptedException e) {
             Logger.e(TAG, "This Happened: ", e);
         }
+    }
+
+    private double batteryinfo() {
+        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+        return round(level / (float)scale, 2) * 100;
     }
 
 
