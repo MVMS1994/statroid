@@ -1,7 +1,9 @@
 package subbiah.veera.statroid.core;
 
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.widget.RemoteViews;
@@ -9,6 +11,7 @@ import android.widget.RemoteViews;
 import java.util.HashMap;
 import java.util.Map;
 
+import subbiah.veera.statroid.MainActivity;
 import subbiah.veera.statroid.R;
 import subbiah.veera.statroid.data.Data;
 
@@ -32,8 +35,16 @@ public class NotificationManager {
 
         if(!builders.containsKey(data.getKey())) {
             int code = (int) (Math.random() * 100);
+            Intent intent = new Intent(activity, MainActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                    activity,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+            );
             NotificationCompat.Builder builder = new NotificationCompat.Builder(application)
-                    .setSmallIcon(R.drawable.portrait_black_24dp);
+                    .setSmallIcon(R.drawable.portrait_black_24dp)
+                    .setContentIntent(pendingIntent);
 
             builders.put(data.getKey(), builder);
             codes.put(data.getKey(), code);
