@@ -2,6 +2,7 @@ package subbiah.veera.statroid.core;
 
 import android.app.ActivityManager;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -24,6 +25,7 @@ public class StatsService extends Service implements Runnable {
 
     private boolean shouldStop = false;
     private volatile Data data;
+    private BroadcastReceiver battery;
 
     @Override
     public void onCreate() {
@@ -31,6 +33,19 @@ public class StatsService extends Service implements Runnable {
 
         data = new Data();
         data.setKey("stats");
+
+        battery = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+                int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+                String total = round((level * 100) / (float) scale, 2);
+
+                Logger.d(TAG, "Battery Used - " + total);
+                data.setBat(total);
+            }
+        };
+
         netinfo();
         cpuinfo();
         batteryinfo();
@@ -49,6 +64,7 @@ public class StatsService extends Service implements Runnable {
         super.onTaskRemoved(rootIntent);
         shouldStop = true;
         NotificationManager.reset(this);
+        unregisterReceiver(battery);
     }
 
     @Nullable
@@ -111,29 +127,7 @@ public class StatsService extends Service implements Runnable {
 
     private void batteryinfo() {
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        final Intent batteryStatus = registerReceiver(null, ifilter);
-
-        new Thread("BatteryInfo") {
-            @Override
-            public void run() {
-                while(!shouldStop) {
-                    if(batteryStatus != null) {
-                        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-                        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-                        String total = round((level * 100) / (float) scale, 2);
-
-                        Logger.d(TAG, "Battery Used - " + total);
-                        data.setBat(total);
-                    }
-
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        Logger.e(TAG, "This Happened: ", e);
-                    }
-                }
-            }
-        }.start();
+        registerReceiver(battery, ifilter);
     }
 
 
