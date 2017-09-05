@@ -25,44 +25,39 @@ public class Data {
         return ram;
     }
 
-    public Data setRam(String ram) {
+    public void setRam(String ram) {
         this.ram = ram + " GB";
-        return this;
     }
 
     public String getCpu() {
         return cpu;
     }
 
-    public Data setCpu(int cpu) {
+    public void setCpu(int cpu) {
         this.cpu = String.valueOf(cpu) + "%";
-        return this;
     }
 
     public String getNetwork() {
         return network;
     }
 
-    public Data setNetwork(String network) {
+    public void setNetwork(String network) {
         this.network = network;
-        return this;
     }
 
     public String getKey() {
         return key;
     }
 
-    public Data setKey(String key) {
+    public void setKey(String key) {
         this.key = key;
-        return this;
     }
 
     public String getBat() {
         return bat;
     }
 
-    public Data setBat(String bat) {
+    public void setBat(String bat) {
         this.bat = bat + "%";
-        return this;
     }
 }
