@@ -54,6 +54,7 @@ public class NotificationManager {
             );
             NotificationCompat.Builder builder = new NotificationCompat.Builder(application)
                     .setSmallIcon(R.drawable.portrait_black_24dp)
+                    .setPriority(NotificationCompat.PRIORITY_MAX)
                     .setContentIntent(pendingIntent);
 
             builders.put(data.getKey(), builder);

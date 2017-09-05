@@ -1,6 +1,8 @@
 package subbiah.veera.statroid.core;
 
 import android.app.ActivityManager;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,6 +11,7 @@ import android.content.IntentFilter;
 import android.net.TrafficStats;
 import android.os.BatteryManager;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.support.annotation.Nullable;
 
 import java.math.BigDecimal;
@@ -31,6 +34,7 @@ public class StatsService extends Service implements Runnable {
     public void onCreate() {
         super.onCreate();
 
+        NotificationManager.reset(this);
         data = new Data();
         data.setKey("stats");
 
@@ -61,7 +65,6 @@ public class StatsService extends Service implements Runnable {
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
-        super.onTaskRemoved(rootIntent);
         shouldStop = true;
         NotificationManager.reset(this);
         try {
@@ -69,6 +72,16 @@ public class StatsService extends Service implements Runnable {
         } catch (IllegalArgumentException e) {
             Logger.d(TAG, "battery Receiver not registered");
         }
+
+        restartService();
+        super.onTaskRemoved(rootIntent);
+    }
+
+    private void restartService() {
+        Intent intent = new Intent(getApplicationContext(), StatsService.class);
+        PendingIntent pendingIntent = PendingIntent.getService(this, 1, intent, PendingIntent.FLAG_ONE_SHOT);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + 500, pendingIntent);
     }
 
     @Nullable
@@ -81,8 +94,8 @@ public class StatsService extends Service implements Runnable {
     public void run() {
         try {
             while(!shouldStop) {
-                Thread.sleep(1000);
                 NotificationManager.showNotification(data, this);
+                Thread.sleep(1000);
             }
         } catch (InterruptedException e) {
             Logger.e(TAG, "This Happened: ", e);
