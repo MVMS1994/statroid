@@ -192,7 +192,6 @@ public class StatsService extends Service implements Runnable {
         }.start();
     }
 
-    @SuppressWarnings("SameParameterValue")
     private static String round(double val, int places) {
         return new BigDecimal(val).setScale(places, BigDecimal.ROUND_HALF_DOWN).toString();
     }
