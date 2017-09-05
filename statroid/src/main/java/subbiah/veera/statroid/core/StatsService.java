@@ -64,7 +64,11 @@ public class StatsService extends Service implements Runnable {
         super.onTaskRemoved(rootIntent);
         shouldStop = true;
         NotificationManager.reset(this);
-        unregisterReceiver(battery);
+        try {
+            unregisterReceiver(battery);
+        } catch (IllegalArgumentException e) {
+            Logger.d(TAG, "battery Receiver not registered");
+        }
     }
 
     @Nullable
