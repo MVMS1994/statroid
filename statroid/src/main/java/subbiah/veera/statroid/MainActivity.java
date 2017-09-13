@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
+
 import io.fabric.sdk.android.Fabric;
 import subbiah.veera.statroid.core.StatsService;
 import subbiah.veera.statroid.core.SystemUtils;
@@ -33,5 +34,11 @@ public class MainActivity extends AppCompatActivity {
         startService(service);
 
         super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        finish();
     }
 }

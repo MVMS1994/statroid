@@ -52,10 +52,11 @@ public class NotificationManager {
                     intent,
                     PendingIntent.FLAG_UPDATE_CURRENT
             );
+            remoteViews.setOnClickPendingIntent(R.id.app_image, pendingIntent);
+
             NotificationCompat.Builder builder = new NotificationCompat.Builder(application)
                     .setSmallIcon(R.drawable.portrait_black_24dp)
-                    .setPriority(NotificationCompat.PRIORITY_MAX)
-                    .setContentIntent(pendingIntent);
+                    .setPriority(NotificationCompat.PRIORITY_MAX);
 
             builders.put(data.getKey(), builder);
             codes.put(data.getKey(), code);
