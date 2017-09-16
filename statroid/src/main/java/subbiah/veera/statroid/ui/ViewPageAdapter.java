@@ -1,5 +1,6 @@
 package subbiah.veera.statroid.ui;
 
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -30,6 +31,10 @@ public class ViewPageAdapter extends FragmentStatePagerAdapter {
     }
 
     public void addFragment(Fragment topic, String instrument) {
+        Bundle params = new Bundle();
+        params.putString("instrument", instrument);
+
+        topic.setArguments(params);
         topics.add(topic);
         instruments.add(instrument);
     }

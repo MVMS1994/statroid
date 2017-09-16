@@ -10,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.core.CrashlyticsCore;
 
 import io.fabric.sdk.android.Fabric;
 import subbiah.veera.statroid.core.StatsService;
@@ -27,7 +28,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Fabric.with(this, new Crashlytics());
+        CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build();
+        Fabric.with(this, new Crashlytics.Builder().core(core).build());
+
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -85,45 +88,9 @@ public class MainActivity extends AppCompatActivity {
         viewPageAdapter.addFragment(new Metrics(), Constants.NET);
 
         viewPager.setAdapter(viewPageAdapter);
-        viewPager.setPageTransformer(false, new ViewPager.PageTransformer() {
-            private static final float MIN_SCALE = 0.75f;
-
-            @Override
-            public void transformPage(View view, float position) {
-                int pageWidth = view.getWidth();
-
-                if (position < -1) { // [-Infinity,-1)
-                    // This page is way off-screen to the left.
-                    view.setAlpha(0);
-
-                } else if (position <= 0) { // [-1,0]
-                    // Use the default slide transition when moving to the left page
-                    view.setAlpha(1);
-                    view.setTranslationX(0);
-                    view.setScaleX(1);
-                    view.setScaleY(1);
-
-                } else if (position <= 1) { // (0,1]
-                    // Fade the page out.
-                    view.setAlpha(1 - position);
-
-                    // Counteract the default slide transition
-                    view.setTranslationX(pageWidth * -position);
-
-                    // Scale the page down (between MIN_SCALE and 1)
-                    float scaleFactor = MIN_SCALE
-                            + (1 - MIN_SCALE) * (1 - Math.abs(position));
-                    view.setScaleX(scaleFactor);
-                    view.setScaleY(scaleFactor);
-
-                } else { // (1,+Infinity]
-                    // This page is way off-screen to the right.
-                    view.setAlpha(0);
-                }
-            }
-        });
     }
 
+    @SuppressWarnings("ConstantConditions")
     public void setupTabIcons(TabLayout tabLayout) {
         tabLayout.getTabAt(0).setIcon(R.drawable.ic_desktop_mac_black_24dp);
         tabLayout.getTabAt(1).setIcon(R.drawable.ic_developer_board_black_24dp);
