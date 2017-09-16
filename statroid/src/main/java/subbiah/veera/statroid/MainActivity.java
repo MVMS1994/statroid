@@ -16,9 +16,7 @@ import io.fabric.sdk.android.Fabric;
 import subbiah.veera.statroid.core.StatsService;
 import subbiah.veera.statroid.core.SystemUtils;
 import subbiah.veera.statroid.data.Constants;
-import subbiah.veera.statroid.data.Metrics;
-import subbiah.veera.statroid.data.NetMetrics;
-import subbiah.veera.statroid.data.RAMMetrics;
+import subbiah.veera.statroid.ui.Metrics;
 import subbiah.veera.statroid.ui.ViewPageAdapter;
 
 public class MainActivity extends AppCompatActivity {

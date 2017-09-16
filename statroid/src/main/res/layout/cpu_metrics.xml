@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/cpu_metrics"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView style="?android:textAppearanceMedium"
-        android:padding="16dp"
-        android:lineSpacingMultiplier="1.2"
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/cpu_chart"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/data"
-        android:text="@string/appbar_scrolling_view_behavior" />
-</ScrollView>
+        android:layout_height="match_parent" />
+
+</RelativeLayout>
