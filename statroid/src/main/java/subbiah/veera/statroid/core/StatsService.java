@@ -43,7 +43,7 @@ public class StatsService extends Service implements Runnable {
             public void onReceive(Context context, Intent intent) {
                 int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
                 int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-                String total = round((level * 100) / (float) scale, 2);
+                String total = round((level * 100) / (float) scale, 0);
 
                 Logger.d(TAG, "Battery Used - " + total);
                 data.setBat(total);

@@ -14,6 +14,7 @@ import java.util.Map;
 
 import subbiah.veera.statroid.MainActivity;
 import subbiah.veera.statroid.R;
+import subbiah.veera.statroid.Statroid;
 import subbiah.veera.statroid.data.Data;
 
 /**
@@ -42,9 +43,7 @@ public class NotificationManager {
             remoteViews.setViewPadding(R.id.notification, padding, 0, padding, 0);
         }
 
-
-        if(!builders.containsKey(data.getKey())) {
-            int code = (int) (Math.random() * 100);
+        if(!Statroid.isActivityVisible()) {
             Intent intent = new Intent(activity, MainActivity.class);
             PendingIntent pendingIntent = PendingIntent.getActivity(
                     activity,
@@ -53,6 +52,12 @@ public class NotificationManager {
                     PendingIntent.FLAG_UPDATE_CURRENT
             );
             remoteViews.setOnClickPendingIntent(R.id.app_image, pendingIntent);
+        } else {
+            remoteViews.setOnClickPendingIntent(R.id.app_image, null);
+        }
+
+        if(!builders.containsKey(data.getKey())) {
+            int code = (int) (Math.random() * 100);
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(application)
                     .setSmallIcon(R.drawable.portrait_black_24dp)
