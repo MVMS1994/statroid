@@ -7,6 +7,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 
 import com.crashlytics.android.Crashlytics;
@@ -16,6 +17,7 @@ import io.fabric.sdk.android.Fabric;
 import subbiah.veera.statroid.core.StatsService;
 import subbiah.veera.statroid.core.SystemUtils;
 import subbiah.veera.statroid.data.Constants;
+import subbiah.veera.statroid.data.Logger;
 import subbiah.veera.statroid.ui.Metrics;
 import subbiah.veera.statroid.ui.ViewPageAdapter;
 
@@ -93,6 +95,12 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.getTabAt(0).setIcon(R.drawable.ic_desktop_mac_black_24dp);
         tabLayout.getTabAt(1).setIcon(R.drawable.ic_developer_board_black_24dp);
         tabLayout.getTabAt(2).setIcon(R.drawable.ic_network_check_black_24dp);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Logger.d(TAG, "onBackPressed");
+        super.onBackPressed();
     }
 }
 
