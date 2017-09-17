@@ -6,42 +6,43 @@ package subbiah.veera.statroid.data;
 
 @SuppressWarnings("SameParameterValue")
 public class Data {
-    private String network = "NA";
-    private String cpu = "NA";
-    private String ram = "NA";
+    private double network = 0;
+    private double cpu = 0;
+    private double ram = 0;
     private String key = "NA";
-    private String bat = "NA";
+    private double bat = 0;
+    private String networkUnit = "";
 
     @Override
     public String toString() {
-        return "Network: " + getNetwork() + "\n" +
+        return "Network: " + getNetwork() + " " + getNetworkUnit() + "\n" +
                 "CPU: " + getCpu() + "\n" +
                 "RAM: " + getRam() + "\n" +
                 "Battery: " + getBat();
     }
 
 
-    public String getRam() {
+    public double getRam() {
         return ram;
     }
 
-    public void setRam(String ram) {
-        this.ram = ram + " GB";
+    public void setRam(double ram) {
+        this.ram = ram;
     }
 
-    public String getCpu() {
+    public double getCpu() {
         return cpu;
     }
 
     public void setCpu(int cpu) {
-        this.cpu = String.valueOf(cpu) + "%";
+        this.cpu = cpu;
     }
 
-    public String getNetwork() {
+    public double getNetwork() {
         return network;
     }
 
-    public void setNetwork(String network) {
+    public void setNetwork(double network) {
         this.network = network;
     }
 
@@ -53,11 +54,19 @@ public class Data {
         this.key = key;
     }
 
-    public String getBat() {
+    public double getBat() {
         return bat;
     }
 
-    public void setBat(String bat) {
-        this.bat = bat + "%";
+    public void setBat(double bat) {
+        this.bat = bat;
+    }
+
+    public void setNetworkUnit(String networkUnit) {
+        this.networkUnit = networkUnit;
+    }
+
+    public String getNetworkUnit() {
+        return networkUnit;
     }
 }

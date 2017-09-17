@@ -61,7 +61,7 @@ public class StatsService extends Service implements Runnable {
             public void onReceive(Context context, Intent intent) {
                 int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
                 int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-                String total = round((level * 100) / (float) scale, 0);
+                double total = round((level * 100) / (float) scale, 0);
 
                 Logger.d(TAG, "Battery Used - " + total);
                 data.setBat(total);
@@ -127,8 +127,8 @@ public class StatsService extends Service implements Runnable {
     private void writeToDB(Data data) {
         if (iterationCount <= 60) {
             values[0] = new Date().getTime();
-            values[1] += Double.parseDouble(data.getNetwork()); // Net
-            values[2] += Double.parseDouble(data.getCpu()); // CPU
+            values[1] += data.getNetwork(); // Net
+            values[2] += data.getCpu(); // CPU
         }
         if (db != null && iterationCount == 60) {
             values[1] /= 60.0; // Net
@@ -147,7 +147,8 @@ public class StatsService extends Service implements Runnable {
                     long total = TrafficStats.getTotalRxBytes() + TrafficStats.getTotalTxBytes();
                     if (prevNetwork[0] == -1) {
                         prevNetwork[0] = total;
-                        data.setNetwork(0 + " KB/s");
+                        data.setNetwork(0);
+                        data.setNetworkUnit("KB/s");
                     }
                     double answer = total - prevNetwork[0];
                     prevNetwork[0] = total;
@@ -166,7 +167,8 @@ public class StatsService extends Service implements Runnable {
                     }
 
                     Logger.d(TAG, "Net Used - " + round(answer, 1) + unit);
-                    data.setNetwork(round(answer, 1) + unit);
+                    data.setNetwork(round(answer, 1));
+                    data.setNetworkUnit(unit);
 
                     try {
                         Thread.sleep(1000);
@@ -225,7 +227,7 @@ public class StatsService extends Service implements Runnable {
                     ActivityManager actManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
                     ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
                     actManager.getMemoryInfo(memInfo);
-                    String total = round(memInfo.availMem / (1024 * 1024 * 1024.0), 2);
+                    double total = round(memInfo.availMem / (1024 * 1024 * 1024.0), 2);
                     Logger.d(TAG, "RAM Used - " + total);
 
                     data.setRam(total);
@@ -239,7 +241,7 @@ public class StatsService extends Service implements Runnable {
         }.start();
     }
 
-    private static String round(double val, int places) {
-        return new BigDecimal(val).setScale(places, BigDecimal.ROUND_HALF_DOWN).toString();
+    private static double round(double val, int places) {
+        return new BigDecimal(val).setScale(places, BigDecimal.ROUND_HALF_DOWN).doubleValue();
     }
 }
