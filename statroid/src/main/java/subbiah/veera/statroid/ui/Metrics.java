@@ -6,9 +6,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -29,16 +27,16 @@ import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
-import com.github.mikephil.charting.listener.ChartTouchListener;
-import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import subbiah.veera.statroid.MainActivity;
 import subbiah.veera.statroid.R;
 import subbiah.veera.statroid.data.Constants;
 import subbiah.veera.statroid.data.Logger;
@@ -75,7 +73,15 @@ public class Metrics extends Fragment {
         super.onActivityCreated(savedInstanceState);
         Logger.d(TAG, "onActivityCreated() called with: savedInstanceState = [" + savedInstanceState + "]");
 
-        drawGraph();
+        fetchData();
+    }
+
+    private void fetchData() {
+        if(activity != null) {
+            ((MainActivity) activity).fetchData();
+        } else {
+            Logger.d(TAG, "fetchData: Activity null ");
+        }
     }
 
     @Override
@@ -90,6 +96,7 @@ public class Metrics extends Fragment {
     private DataSet drawGraph() {
         Chart chart = null;
         DataSet dataSet = null;
+
         if (instrument.equals(Constants.CPU)) {
             chart = (LineChart) getActivity().findViewById(R.id.cpu_chart);
             dataSet = initCPUGraph((LineChart) chart, timeInterval, yData);
@@ -97,6 +104,7 @@ public class Metrics extends Fragment {
             chart = (PieChart) getActivity().findViewById(R.id.ram_chart);
             dataSet = initRAMGraph((PieChart) chart, getData());
         }
+
         if (chart != null)
             drawChart(chart);
 
@@ -140,8 +148,6 @@ public class Metrics extends Fragment {
         x.setAxisLineWidth(1.5f);
         x.setDrawGridLines(false);
         x.setTextSize(12);
-        x.setSpaceMin(1);
-        x.setAxisMinimum(xData[0]);
         x.setValueFormatter(new IAxisValueFormatter() {
             @Override
             public String getFormattedValue(float value, AxisBase axis) {
@@ -154,7 +160,6 @@ public class Metrics extends Fragment {
         left.setAxisMaximum(100);
         left.setAxisLineWidth(1.5f);
         left.setTextSize(12);
-        left.setMinWidth(1);
 
         YAxis right = chart.getAxisRight();
         right.setDrawLabels(false);

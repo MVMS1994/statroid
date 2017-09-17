@@ -18,7 +18,6 @@ import android.os.SystemClock;
 import android.support.annotation.Nullable;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
 import java.util.Date;
 
 import subbiah.veera.statroid.MainActivity;
@@ -27,7 +26,10 @@ import subbiah.veera.statroid.data.DBHelper;
 import subbiah.veera.statroid.data.Data;
 import subbiah.veera.statroid.data.Logger;
 
-import static subbiah.veera.statroid.data.Constants.DBConstants.*;
+import static subbiah.veera.statroid.data.Constants.DBConstants.CPU;
+import static subbiah.veera.statroid.data.Constants.DBConstants.NET;
+import static subbiah.veera.statroid.data.Constants.DBConstants.TIME;
+import static subbiah.veera.statroid.data.Constants.ServiceConstants.UPDATE_GRAPH;
 
 /**
  * Created by Veera.Subbiah on 04/09/17.
@@ -37,7 +39,7 @@ public class StatsService extends Service implements Runnable {
     private static final String TAG = "StatsService";
 
     private boolean shouldStop = false;
-    private int prevMinute = Calendar.getInstance().get(Calendar.MINUTE) - 1;
+    private int prevMinute = new Date().getMinutes() - 1;
 
     private String[] projection;
     private double[] values;
@@ -81,13 +83,7 @@ public class StatsService extends Service implements Runnable {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if(Statroid.isActivityVisible()) {
-            Activity activity = ((Statroid) getApplication()).getCurrentActivity();
-            if(activity != null && activity instanceof MainActivity) {
-                ((MainActivity) activity).updateData(readFromDB(), data);
-            }
-        }
-
+        onHandleIntent(intent);
         return START_STICKY;
     }
 
@@ -120,18 +116,23 @@ public class StatsService extends Service implements Runnable {
         return null;
     }
 
+    protected void onHandleIntent(Intent intent) {
+        if (intent != null) {
+            final String action = intent.getAction();
+            if (UPDATE_GRAPH.equals(action)) {
+                updateUI(data);
+            }
+        }
+    }
+
     @Override
     public void run() {
         try {
             while (!shouldStop) {
                 NotificationManager.showNotification(data, this);
                 long id = writeToDB(data);
-                if(Statroid.isActivityVisible() && id != -1) {
-                    Activity activity = ((Statroid) getApplication()).getCurrentActivity();
-                    if(activity != null && activity instanceof MainActivity) {
-                        ((MainActivity) activity).updateData(readFromDB(), data);
-                    }
-                }
+                if(id != -1)
+                    updateUI(data);
                 Thread.sleep(1000);
             }
         } catch (InterruptedException e) {
@@ -142,20 +143,20 @@ public class StatsService extends Service implements Runnable {
     @Nullable
     private Cursor readFromDB() {
         if(db != null)
-            return DBHelper.read(projection, TIME + " > ?", new String[]{"" + (Calendar.getInstance().getTimeInMillis() - 1000 * 60 * 60)}, TIME, db);
+            return DBHelper.read(projection, TIME + " > ?", new String[]{"" + (new Date().getTime() - 1000 * 60 * 60)}, TIME, db);
 
         return null;
     }
 
     private long writeToDB(Data data) {
-        Calendar calendar = Calendar.getInstance();
-        int currentMin = calendar.get(Calendar.MINUTE);
+        Date date = new Date();
+        int currentMin = date.getMinutes();
         if (prevMinute == currentMin) {
             values[1] += data.getNetwork(); // Net
             values[2] += data.getCpu(); // CPU
         } else {
             if (db != null) {
-                values[0] = calendar.getTimeInMillis();
+                values[0] = date.getTime();
                 values[1] /= 60.0; // Net
                 values[2] /= 60.0; // CPU
                 prevMinute = currentMin;
@@ -164,6 +165,16 @@ public class StatsService extends Service implements Runnable {
         }
         return -1;
     }
+
+    private void updateUI(Data data) {
+        if(Statroid.isActivityVisible()) {
+            Activity activity = ((Statroid) getApplication()).getCurrentActivity();
+            if(activity != null && activity instanceof MainActivity) {
+                ((MainActivity) activity).updateData(readFromDB(), data);
+            }
+        }
+    }
+
 
     private void netinfo() {
         final long[] prevNetwork = {-1};

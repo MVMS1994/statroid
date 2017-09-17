@@ -25,6 +25,8 @@ import subbiah.veera.statroid.data.Logger;
 import subbiah.veera.statroid.ui.Metrics;
 import subbiah.veera.statroid.ui.ViewPageAdapter;
 
+import static subbiah.veera.statroid.data.Constants.ServiceConstants.UPDATE_GRAPH;
+
 public class MainActivity extends AppCompatActivity {
     @SuppressWarnings("unused")
     private static final String TAG = "MainActivity";
@@ -125,6 +127,12 @@ public class MainActivity extends AppCompatActivity {
             viewPageAdapter.addDataToFragment(time, cpu, Constants.CPU);
             viewPageAdapter.addDataToFragment(time, net, Constants.NET);
         }
+    }
+
+    public void fetchData() {
+        Intent intent = new Intent(this, StatsService.class);
+        intent.setAction(UPDATE_GRAPH);
+        startService(intent);
     }
 }
 
