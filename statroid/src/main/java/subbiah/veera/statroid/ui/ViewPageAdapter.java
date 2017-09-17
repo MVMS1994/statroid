@@ -1,12 +1,15 @@
 package subbiah.veera.statroid.ui;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v7.app.ActionBar;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Created by Veera.Subbiah on 16/09/17.
@@ -14,8 +17,8 @@ import java.util.List;
 
 public class ViewPageAdapter extends FragmentStatePagerAdapter {
 
-    private List<Fragment> topics = new ArrayList<>();
-    private List<String> instruments = new ArrayList<>();
+    private ArrayList<Fragment> topics = new ArrayList<>(3);
+    private HashMap<String, Metrics> fragments = new HashMap<>();
 
     public ViewPageAdapter(FragmentManager fm) {
         super(fm);
@@ -30,18 +33,19 @@ public class ViewPageAdapter extends FragmentStatePagerAdapter {
         }
     }
 
-    public void addFragment(Fragment topic, String instrument) {
+    public void addFragment(Metrics topic, String instrument) {
         Bundle params = new Bundle();
         params.putString("instrument", instrument);
 
+
         topic.setArguments(params);
+        fragments.put(instrument, topic);
         topics.add(topic);
-        instruments.add(instrument);
     }
 
     @Override
     public int getCount() {
-        return topics.size();
+        return fragments.values().size();
     }
 
     @Override
@@ -49,7 +53,14 @@ public class ViewPageAdapter extends FragmentStatePagerAdapter {
         return null;
     }
 
-    public List<String> getInstruments() {
-        return instruments;
+    public Set<String> getInstruments() {
+        return fragments.keySet();
+    }
+
+    public void addDataToFragment(long[] time, double[] yData, String instrument) {
+        if(fragments.containsKey(instrument)) {
+            Metrics fragment = fragments.get(instrument);
+            fragment.setData(time, yData);
+        }
     }
 }

@@ -1,10 +1,14 @@
 package subbiah.veera.statroid.ui;
 
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -12,6 +16,8 @@ import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.DataSet;
@@ -21,9 +27,17 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.ChartTouchListener;
+import com.github.mikephil.charting.listener.OnChartGestureListener;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import subbiah.veera.statroid.R;
 import subbiah.veera.statroid.data.Constants;
@@ -37,12 +51,14 @@ public class Metrics extends Fragment {
 
     private static final String TAG = "Metrics";
     private String instrument;
+    private double[] yData = new double[0];
+    private long[] timeInterval = new long[0];
+    private Activity activity;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         instrument = getArguments().getString("instrument", "");
-        Logger.d(TAG, instrument);
 
         switch (instrument) {
             case Constants.RAM:
@@ -57,7 +73,17 @@ public class Metrics extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        Logger.d(TAG, "onActivityCreated() called with: savedInstanceState = [" + savedInstanceState + "]");
+
         drawGraph();
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        Logger.d(TAG, "onAttach() called with: context = [" + context + "]");
+
+        activity = (Activity) context;
     }
 
     @Nullable
@@ -66,7 +92,7 @@ public class Metrics extends Fragment {
         DataSet dataSet = null;
         if (instrument.equals(Constants.CPU)) {
             chart = (LineChart) getActivity().findViewById(R.id.cpu_chart);
-            dataSet = initCPUGraph((LineChart) chart, getData());
+            dataSet = initCPUGraph((LineChart) chart, timeInterval, yData);
         } else if (instrument.equals(Constants.RAM)) {
             chart = (PieChart) getActivity().findViewById(R.id.ram_chart);
             dataSet = initRAMGraph((PieChart) chart, getData());
@@ -79,54 +105,79 @@ public class Metrics extends Fragment {
 
     private Object[] getData() {
         switch (instrument) {
-            case Constants.CPU:
-                return new Integer[]{0, 1, 2, 3, 4, 5, 6, 7, 8};
             case Constants.RAM:
-                return new Float[] {Float.valueOf(80)};
+                return new Float[]{Float.valueOf(80)};
             default:
-                return new Float[] {Float.valueOf(80), Float.valueOf(20)};
+                return new Float[]{Float.valueOf(80), Float.valueOf(20)};
         }
     }
 
-    private LineDataSet initCPUGraph(LineChart chart, Object[] dataObjects) {
+    private LineDataSet initCPUGraph(final LineChart chart, long[] xData, double[] yData) {
+        if (xData.length != yData.length || yData.length == 0) return null;
+
         List<Entry> entries = new ArrayList<>();
-
-        for (int i = dataObjects.length - 1; i >= 0; i--) {
-            entries.add(new Entry(-1 * (Integer) dataObjects[i], (Integer) dataObjects[i] * (Integer) dataObjects[i]));
+        for (int i = 0; i < xData.length; i++) {
+            Logger.d(TAG, "initCPUGraph:" + new Date(xData[i]).getMinutes());
+            entries.add(new Entry(xData[i], (float) yData[i]));
         }
-
-        for (int data : (Integer[]) dataObjects) {
-            entries.add(new Entry(data, data * data));
-        }
-
 
         LineDataSet dataSet = new LineDataSet(entries, "CPU Usage history");
         dataSet.setColor(getResources().getColor(R.color.colorAccentDark));
-        dataSet.setValueTextColor(getResources().getColor(R.color.colorPrimaryLight));
-        dataSet.setValueTextSize(9);
+        dataSet.setDrawValues(false);
+        dataSet.setDrawFilled(true);
+        dataSet.setCircleColor(getResources().getColor(R.color.colorPrimaryLight));
+        dataSet.setFillColor(getResources().getColor(R.color.colorAccentLight));
+        dataSet.setLineWidth(2f);
 
         LineData lineData = new LineData(dataSet);
-        chart.setData(lineData);
-        chart.setScaleYEnabled(false);
-        chart.setPinchZoom(false);
-        chart.setDoubleTapToZoomEnabled(false);
-        chart.getDescription().setEnabled(false);
+        final Description desc = new Description();
+//        desc.setPosition(chart.getViewPortHandler().contentRight() - 10, chart.getViewPortHandler().contentTop() - 10);
+        desc.setText("");
+
 
         XAxis x = chart.getXAxis();
         x.setPosition(XAxis.XAxisPosition.BOTTOM);
-        x.setAxisLineWidth(2f);
+        x.setAxisLineWidth(1.5f);
+        x.setDrawGridLines(false);
         x.setTextSize(12);
-        x.setLabelCount(7);
+        x.setSpaceMin(1);
+        x.setAxisMinimum(xData[0]);
+        x.setValueFormatter(new IAxisValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                return getDate((long) value);
+            }
+        });
 
-        YAxis left = chart.getAxisLeft();
+        final YAxis left = chart.getAxisLeft();
         left.setAxisMinimum(0);
         left.setAxisMaximum(100);
-        left.setAxisLineWidth(2f);
+        left.setAxisLineWidth(1.5f);
         left.setTextSize(12);
+        left.setMinWidth(1);
 
         YAxis right = chart.getAxisRight();
         right.setDrawLabels(false);
         right.setDrawGridLines(false);
+
+        chart.setData(lineData);
+        chart.setScaleYEnabled(false);
+        chart.setPinchZoom(false);
+        chart.setDoubleTapToZoomEnabled(false);
+        chart.setDescription(desc);
+        chart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry e, Highlight h) {
+                desc.setText("CPU - " + e.getY() + "; Time - " + getDate((long) e.getX()));
+                chart.setDescription(desc);
+            }
+
+            @Override
+            public void onNothingSelected() {
+                desc.setText("");
+                chart.setDescription(desc);
+            }
+        });
 
         return dataSet;
     }
@@ -159,5 +210,27 @@ public class Metrics extends Fragment {
 
     private void drawChart(Chart chart) {
         chart.invalidate();
+    }
+
+    public void setData(long[] time, double[] yData) {
+        this.yData = yData;
+        this.timeInterval = time;
+
+        if(activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    drawGraph();
+                }
+            });
+        } else {
+            Logger.d(TAG, "setData: activity null" );
+        }
+    }
+
+    private static String getDate(long value) {
+        Date date = new Date(value);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("h:mm", Locale.US);
+        return simpleDateFormat.format(date);
     }
 }

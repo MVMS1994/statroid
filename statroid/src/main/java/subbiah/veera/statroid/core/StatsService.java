@@ -1,5 +1,6 @@
 package subbiah.veera.statroid.core;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -8,6 +9,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.TrafficStats;
 import android.os.BatteryManager;
@@ -16,8 +18,10 @@ import android.os.SystemClock;
 import android.support.annotation.Nullable;
 
 import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.Date;
 
+import subbiah.veera.statroid.MainActivity;
 import subbiah.veera.statroid.Statroid;
 import subbiah.veera.statroid.data.DBHelper;
 import subbiah.veera.statroid.data.Data;
@@ -33,15 +37,14 @@ public class StatsService extends Service implements Runnable {
     private static final String TAG = "StatsService";
 
     private boolean shouldStop = false;
-    private long iterationCount;
+    private int prevMinute = Calendar.getInstance().get(Calendar.MINUTE) - 1;
 
     private String[] projection;
     private double[] values;
 
     private volatile Data data;
     private BroadcastReceiver battery;
-    @Nullable
-    private SQLiteDatabase db = null;
+    @Nullable private SQLiteDatabase db = null;
 
 
     @Override
@@ -49,7 +52,6 @@ public class StatsService extends Service implements Runnable {
         super.onCreate();
 
         db = DBHelper.init(this);
-        iterationCount = 0;
         projection = new String[]{TIME, NET, CPU};
         values = new double[]{0, 0, 0};
 
@@ -79,6 +81,13 @@ public class StatsService extends Service implements Runnable {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if(Statroid.isActivityVisible()) {
+            Activity activity = ((Statroid) getApplication()).getCurrentActivity();
+            if(activity != null && activity instanceof MainActivity) {
+                ((MainActivity) activity).updateData(readFromDB(), data);
+            }
+        }
+
         return START_STICKY;
     }
 
@@ -94,7 +103,7 @@ public class StatsService extends Service implements Runnable {
         DBHelper.reset(db);
         db = null;
 
-        restartService();
+        // restartService();
         super.onTaskRemoved(rootIntent);
     }
 
@@ -115,11 +124,13 @@ public class StatsService extends Service implements Runnable {
     public void run() {
         try {
             while (!shouldStop) {
-                iterationCount++;
                 NotificationManager.showNotification(data, this);
-                writeToDB(data);
-                if(Statroid.isActivityVisible()) {
-
+                long id = writeToDB(data);
+                if(Statroid.isActivityVisible() && id != -1) {
+                    Activity activity = ((Statroid) getApplication()).getCurrentActivity();
+                    if(activity != null && activity instanceof MainActivity) {
+                        ((MainActivity) activity).updateData(readFromDB(), data);
+                    }
                 }
                 Thread.sleep(1000);
             }
@@ -128,18 +139,30 @@ public class StatsService extends Service implements Runnable {
         }
     }
 
-    private void writeToDB(Data data) {
-        if (iterationCount <= 60) {
-            values[0] = new Date().getTime();
+    @Nullable
+    private Cursor readFromDB() {
+        if(db != null)
+            return DBHelper.read(projection, TIME + " > ?", new String[]{"" + (Calendar.getInstance().getTimeInMillis() - 1000 * 60 * 60)}, TIME, db);
+
+        return null;
+    }
+
+    private long writeToDB(Data data) {
+        Calendar calendar = Calendar.getInstance();
+        int currentMin = calendar.get(Calendar.MINUTE);
+        if (prevMinute == currentMin) {
             values[1] += data.getNetwork(); // Net
             values[2] += data.getCpu(); // CPU
+        } else {
+            if (db != null) {
+                values[0] = calendar.getTimeInMillis();
+                values[1] /= 60.0; // Net
+                values[2] /= 60.0; // CPU
+                prevMinute = currentMin;
+                return DBHelper.write(projection, values, db);
+            }
         }
-        if (db != null && iterationCount == 60) {
-            values[1] /= 60.0; // Net
-            values[2] /= 60.0; // CPU
-            iterationCount = 0;
-            DBHelper.write(projection, values, db);
-        }
+        return -1;
     }
 
     private void netinfo() {
@@ -245,7 +268,7 @@ public class StatsService extends Service implements Runnable {
         }.start();
     }
 
-    private static double round(double val, int places) {
+    public static double round(double val, int places) {
         return new BigDecimal(val).setScale(places, BigDecimal.ROUND_HALF_DOWN).doubleValue();
     }
 }
