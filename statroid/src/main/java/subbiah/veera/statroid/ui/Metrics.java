@@ -31,7 +31,6 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -53,6 +52,12 @@ public class Metrics extends Fragment {
     private long[] timeInterval = new long[0];
     private Activity activity;
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -65,22 +70,6 @@ public class Metrics extends Fragment {
                 return inflater.inflate(R.layout.cpu_metrics, container, false);
             default:
                 return inflater.inflate(R.layout.ram_metrics, container, false);
-        }
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        Logger.d(TAG, "onActivityCreated() called with: savedInstanceState = [" + savedInstanceState + "]");
-
-        fetchData();
-    }
-
-    private void fetchData() {
-        if(activity != null) {
-            ((MainActivity) activity).fetchData();
-        } else {
-            Logger.d(TAG, "fetchData: Activity null ");
         }
     }
 
@@ -98,10 +87,10 @@ public class Metrics extends Fragment {
         DataSet dataSet = null;
 
         if (instrument.equals(Constants.CPU)) {
-            chart = (LineChart) getActivity().findViewById(R.id.cpu_chart);
+            chart = (LineChart) activity.findViewById(R.id.cpu_chart);
             dataSet = initCPUGraph((LineChart) chart, timeInterval, yData);
         } else if (instrument.equals(Constants.RAM)) {
-            chart = (PieChart) getActivity().findViewById(R.id.ram_chart);
+            chart = (PieChart) activity.findViewById(R.id.ram_chart);
             dataSet = initRAMGraph((PieChart) chart, getData());
         }
 
@@ -120,6 +109,7 @@ public class Metrics extends Fragment {
         }
     }
 
+    @Nullable
     private LineDataSet initCPUGraph(final LineChart chart, long[] xData, double[] yData) {
         if (xData.length != yData.length || yData.length == 0) return null;
 
@@ -229,7 +219,7 @@ public class Metrics extends Fragment {
                 }
             });
         } else {
-            Logger.d(TAG, "setData: activity null" );
+            Logger.d(TAG, "setData: null " + this);
         }
     }
 
@@ -237,5 +227,9 @@ public class Metrics extends Fragment {
         Date date = new Date(value);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("h:mm", Locale.US);
         return simpleDateFormat.format(date);
+    }
+
+    public String getInstrument() {
+        return instrument;
     }
 }

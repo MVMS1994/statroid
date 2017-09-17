@@ -83,7 +83,6 @@ public class StatsService extends Service implements Runnable {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        onHandleIntent(intent);
         return START_STICKY;
     }
 
@@ -116,23 +115,12 @@ public class StatsService extends Service implements Runnable {
         return null;
     }
 
-    protected void onHandleIntent(Intent intent) {
-        if (intent != null) {
-            final String action = intent.getAction();
-            if (UPDATE_GRAPH.equals(action)) {
-                updateUI(data);
-            }
-        }
-    }
-
     @Override
     public void run() {
         try {
             while (!shouldStop) {
                 NotificationManager.showNotification(data, this);
-                long id = writeToDB(data);
-                if(id != -1)
-                    updateUI(data);
+                writeToDB(data);
                 Thread.sleep(1000);
             }
         } catch (InterruptedException e) {
@@ -165,16 +153,6 @@ public class StatsService extends Service implements Runnable {
         }
         return -1;
     }
-
-    private void updateUI(Data data) {
-        if(Statroid.isActivityVisible()) {
-            Activity activity = ((Statroid) getApplication()).getCurrentActivity();
-            if(activity != null && activity instanceof MainActivity) {
-                ((MainActivity) activity).updateData(readFromDB(), data);
-            }
-        }
-    }
-
 
     private void netinfo() {
         final long[] prevNetwork = {-1};

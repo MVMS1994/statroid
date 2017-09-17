@@ -16,6 +16,9 @@ import android.view.View;
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+
 import io.fabric.sdk.android.Fabric;
 import subbiah.veera.statroid.core.StatsService;
 import subbiah.veera.statroid.core.SystemUtils;
@@ -30,13 +33,14 @@ import static subbiah.veera.statroid.data.Constants.ServiceConstants.UPDATE_GRAP
 public class MainActivity extends AppCompatActivity {
     @SuppressWarnings("unused")
     private static final String TAG = "MainActivity";
-    @Nullable
     private ViewPageAdapter viewPageAdapter;
+    private ViewPager viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Logger.d(TAG, "onCreate() called with: savedInstanceState = [" + savedInstanceState + "]");
         Statroid.setActivityAlive(true);
         ((Statroid) getApplication()).setCurrentActivity(this);
 
@@ -45,16 +49,9 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitleTextColor(getResources().getColor(android.R.color.white));
-        setSupportActionBar(toolbar);
-
-        ViewPager viewPager = (ViewPager) findViewById(R.id.content);
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
-
-        viewPageAdapter = setupViewPager(viewPager);
-        tabLayout.setupWithViewPager(viewPager);
-        setupTabIcons(tabLayout);
+        initToolbar();
+        initPageViewer(savedInstanceState);
+        initTabLayout();
     }
 
     @Override
@@ -81,6 +78,12 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putSerializable("retainedPages", viewPageAdapter.exportList());
+        super.onSaveInstanceState(outState);
+    }
+
     public void showInfo(View view) {
         String adb = "adb connect " +
                 SystemUtils.getIpAddr(this) + ":" +
@@ -95,14 +98,10 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
-    private ViewPageAdapter setupViewPager(ViewPager viewPager) {
-        ViewPageAdapter viewPageAdapter = new ViewPageAdapter(getSupportFragmentManager());
+    private void setupViewPager(ViewPager viewPager) {
         viewPageAdapter.addFragment(new Metrics(), Constants.CPU);
         viewPageAdapter.addFragment(new Metrics(), Constants.RAM);
         viewPageAdapter.addFragment(new Metrics(), Constants.NET);
-
-        viewPager.setAdapter(viewPageAdapter);
-        return viewPageAdapter;
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -128,6 +127,33 @@ public class MainActivity extends AppCompatActivity {
             viewPageAdapter.addDataToFragment(time, net, Constants.NET);
         }
     }
+
+    private void initTabLayout() {
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        tabLayout.setupWithViewPager(viewPager);
+        setupTabIcons(tabLayout);
+    }
+
+    private void initPageViewer(Bundle savedInstanceState) {
+        viewPager = (ViewPager) findViewById(R.id.content);
+        viewPageAdapter = new ViewPageAdapter(getSupportFragmentManager());
+
+        if (savedInstanceState != null) {
+            ArrayList<Metrics> retainedPages = (ArrayList<Metrics>) savedInstanceState.getSerializable("retainedPages");
+            viewPageAdapter.importList(retainedPages);
+        } else {
+            setupViewPager(viewPager);
+        }
+
+        viewPager.setAdapter(viewPageAdapter);
+    }
+
+    private void initToolbar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitleTextColor(getResources().getColor(android.R.color.white));
+        setSupportActionBar(toolbar);
+    }
+
 
     public void fetchData() {
         Intent intent = new Intent(this, StatsService.class);
