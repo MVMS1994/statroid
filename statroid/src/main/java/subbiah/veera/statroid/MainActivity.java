@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
         Fabric.with(this, new Crashlytics.Builder().core(core).build());
 
         setContentView(R.layout.activity_main);
+        Statroid.setActivityAlive(true);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(getResources().getColor(android.R.color.white));
@@ -57,14 +58,21 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
 
-        Statroid.activityPaused();
+        Statroid.setActivityVisible(false);
     }
 
     @Override
     protected void onResume() {
-        Statroid.activityResumed();
+        Statroid.setActivityVisible(true);
 
         super.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Statroid.setActivityAlive(false);
+
+        super.onDestroy();
     }
 
     public void showInfo(View view) {

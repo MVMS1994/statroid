@@ -18,6 +18,7 @@ import android.support.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import subbiah.veera.statroid.Statroid;
 import subbiah.veera.statroid.data.DBHelper;
 import subbiah.veera.statroid.data.Data;
 import subbiah.veera.statroid.data.Logger;
@@ -117,6 +118,9 @@ public class StatsService extends Service implements Runnable {
                 iterationCount++;
                 NotificationManager.showNotification(data, this);
                 writeToDB(data);
+                if(Statroid.isActivityVisible()) {
+
+                }
                 Thread.sleep(1000);
             }
         } catch (InterruptedException e) {
