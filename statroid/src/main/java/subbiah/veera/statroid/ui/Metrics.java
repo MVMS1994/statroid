@@ -151,6 +151,7 @@ public class Metrics extends Fragment {
         chart.getDescription().setEnabled(false);
         chart.getLegend().setEnabled(false);
         chart.setDrawCenterText(true);
+        chart.setExtraOffsets(10, 10, 10, 10);
         chart.setCenterText("RAM Usage history");
 
         return dataSet;

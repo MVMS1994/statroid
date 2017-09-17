@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.TrafficStats;
 import android.os.BatteryManager;
 import android.os.IBinder;
@@ -15,9 +16,13 @@ import android.os.SystemClock;
 import android.support.annotation.Nullable;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
+import subbiah.veera.statroid.data.DBHelper;
 import subbiah.veera.statroid.data.Data;
 import subbiah.veera.statroid.data.Logger;
+
+import static subbiah.veera.statroid.data.Constants.DBConstants.*;
 
 /**
  * Created by Veera.Subbiah on 04/09/17.
@@ -27,12 +32,25 @@ public class StatsService extends Service implements Runnable {
     private static final String TAG = "StatsService";
 
     private boolean shouldStop = false;
+    private long iterationCount;
+
+    private String[] projection;
+    private double[] values;
+
     private volatile Data data;
     private BroadcastReceiver battery;
+    @Nullable
+    private SQLiteDatabase db = null;
+
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        db = DBHelper.init(this);
+        iterationCount = 0;
+        projection = new String[]{TIME, NET, CPU};
+        values = new double[]{0, 0, 0};
 
         NotificationManager.reset(this);
         data = new Data();
@@ -72,6 +90,8 @@ public class StatsService extends Service implements Runnable {
         } catch (IllegalArgumentException e) {
             Logger.d(TAG, "battery Receiver not registered");
         }
+        DBHelper.reset(db);
+        db = null;
 
         restartService();
         super.onTaskRemoved(rootIntent);
@@ -93,12 +113,28 @@ public class StatsService extends Service implements Runnable {
     @Override
     public void run() {
         try {
-            while(!shouldStop) {
+            while (!shouldStop) {
+                iterationCount++;
                 NotificationManager.showNotification(data, this);
+                writeToDB(data);
                 Thread.sleep(1000);
             }
         } catch (InterruptedException e) {
             Logger.e(TAG, "This Happened: ", e);
+        }
+    }
+
+    private void writeToDB(Data data) {
+        if (iterationCount <= 60) {
+            values[0] = new Date().getTime();
+            values[1] += Double.parseDouble(data.getNetwork()); // Net
+            values[2] += Double.parseDouble(data.getCpu()); // CPU
+        }
+        if (db != null && iterationCount == 60) {
+            values[1] /= 60.0; // Net
+            values[2] /= 60.0; // CPU
+            iterationCount = 0;
+            DBHelper.write(projection, values, db);
         }
     }
 
@@ -107,7 +143,7 @@ public class StatsService extends Service implements Runnable {
         new Thread("NetworkInfo") {
             @Override
             public void run() {
-                while(!shouldStop) {
+                while (!shouldStop) {
                     long total = TrafficStats.getTotalRxBytes() + TrafficStats.getTotalTxBytes();
                     if (prevNetwork[0] == -1) {
                         prevNetwork[0] = total;
@@ -153,7 +189,7 @@ public class StatsService extends Service implements Runnable {
 
             @Override
             public void run() {
-                while(!shouldStop) {
+                while (!shouldStop) {
                     try {
                         String rawTop = SystemUtils.runADB("top -n 1 -m 1");
                         rawTop = rawTop.substring(0, rawTop.indexOf("User", 4));
@@ -185,7 +221,7 @@ public class StatsService extends Service implements Runnable {
         new Thread("RAM Info") {
             @Override
             public void run() {
-                while(!shouldStop) {
+                while (!shouldStop) {
                     ActivityManager actManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
                     ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
                     actManager.getMemoryInfo(memInfo);
