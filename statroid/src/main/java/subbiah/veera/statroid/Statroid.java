@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.Application;
 import android.support.annotation.Nullable;
 
+import com.squareup.leakcanary.LeakCanary;
+
 /**
  * Created by Veera.Subbiah on 16/09/17.
  */
@@ -12,6 +14,14 @@ public class Statroid extends Application {
     private static boolean activityVisible = false;
     private static boolean activityAlive = false;
     @Nullable private Activity currentActivity = null;
+
+    @Override public void onCreate() {
+        super.onCreate();
+        if (LeakCanary.isInAnalyzerProcess(this)) {
+            return;
+        }
+        LeakCanary.install(this);
+    }
 
     public static boolean isActivityAlive() {
         return activityAlive;

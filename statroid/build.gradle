@@ -28,7 +28,10 @@ android {
         minSdkVersion 16
         targetSdkVersion 25
         versionCode 1
-        versionName "1.0"
+        versionName "2.0"
+        jackOptions {
+            enabled true
+        }
     }
 
     signingConfigs {
@@ -48,6 +51,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
@@ -60,4 +68,8 @@ dependencies {
     compile('com.github.PhilJay:MPAndroidChart:v3.0.2') {
         transitive = true;
     }
+    debugCompile ('com.squareup.leakcanary:leakcanary-android:1.5.3') {
+        transitive = true;
+    }
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.3'
 }
