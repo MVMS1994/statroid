@@ -1,6 +1,8 @@
 package subbiah.veera.statroid.ui;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -253,7 +255,7 @@ public class Metrics extends Fragment implements Parcelable, Runnable {
             chart.setDrawHoleEnabled(true);
             chart.setHoleColor(Color.WHITE);
             chart.animateY(1400, Easing.EasingOption.EaseInOutQuad);
-            chart.getLegend().setEnabled(true);
+            chart.getLegend().setEnabled(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
             chart.getDescription().setEnabled(false);
             chart.setDrawCenterText(true);
             chart.setExtraOffsets(10, 10, 10, 10);
