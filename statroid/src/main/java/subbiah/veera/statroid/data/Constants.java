@@ -35,4 +35,15 @@ public class Constants {
         static final String SQL_DELETE_ENTRIES =
                 "DROP TABLE IF EXISTS " + "status";
     }
+
+    public static class INTERVAL {
+        public final int INTERVAL;
+        public INTERVAL(String instrument) {
+            if(instrument.equals(RAM)) {
+                INTERVAL = 1000;
+            } else {
+                INTERVAL = 1000 * 60;
+            }
+        }
+    }
 }

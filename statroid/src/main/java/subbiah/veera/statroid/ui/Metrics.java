@@ -43,6 +43,7 @@ import subbiah.veera.statroid.data.Constants;
 import subbiah.veera.statroid.data.DBHelper;
 import subbiah.veera.statroid.data.Logger;
 
+import static java.lang.Thread.State.TIMED_WAITING;
 import static subbiah.veera.statroid.data.Constants.DBConstants.CPU;
 import static subbiah.veera.statroid.data.Constants.DBConstants.READ;
 import static subbiah.veera.statroid.data.Constants.DBConstants.TIME;
@@ -125,20 +126,34 @@ public class Metrics extends Fragment implements Parcelable, Runnable {
         super.onActivityCreated(savedInstanceState);
 
         db = DBHelper.init(getContext(), READ);
-        if(stopRunning) {
-            stopRunning = false;
-            runningThread = new Thread(this, "ui_" + instrument);
-            runningThread.start();
-        } else {
-            runningThread.interrupt();
-        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if(isRemoving()) {
+        try {
             stopRunning = true;
+            runningThread.interrupt();
+            runningThread.join();
+        } catch (InterruptedException ignored) {} finally {
+            if(isRemoving()) {
+                runningThread = null;
+                db = null;
+            }
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        stopRunning = false;
+        if(runningThread == null) {
+            runningThread = new Thread(this, "ui_" + instrument);
+        }
+        if(runningThread.getState() == Thread.State.TIMED_WAITING) {
+            runningThread.interrupt();
+        } else if(!runningThread.isAlive()) {
+            runningThread.start();
         }
     }
 
@@ -329,12 +344,13 @@ public class Metrics extends Fragment implements Parcelable, Runnable {
 
     @Override
     public void run() {
+        int INTERVAL = new Constants.INTERVAL(instrument).INTERVAL;
         while(!stopRunning) {
             try {
                 readFromDB();
-                Thread.sleep(60 * 1000);
+                Thread.sleep(INTERVAL);
             } catch (InterruptedException e) {
-                Logger.e(TAG, "run: ", e);
+                Logger.d(TAG, "run: Interrupted from sleep " + Thread.currentThread().getName());
             }
         }
     }
