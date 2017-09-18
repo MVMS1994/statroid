@@ -1,6 +1,5 @@
 package subbiah.veera.statroid.core;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -20,8 +19,6 @@ import android.support.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import subbiah.veera.statroid.MainActivity;
-import subbiah.veera.statroid.Statroid;
 import subbiah.veera.statroid.data.DBHelper;
 import subbiah.veera.statroid.data.Data;
 import subbiah.veera.statroid.data.Logger;
@@ -29,7 +26,6 @@ import subbiah.veera.statroid.data.Logger;
 import static subbiah.veera.statroid.data.Constants.DBConstants.CPU;
 import static subbiah.veera.statroid.data.Constants.DBConstants.NET;
 import static subbiah.veera.statroid.data.Constants.DBConstants.TIME;
-import static subbiah.veera.statroid.data.Constants.ServiceConstants.UPDATE_GRAPH;
 
 /**
  * Created by Veera.Subbiah on 04/09/17.
@@ -39,6 +35,7 @@ public class StatsService extends Service implements Runnable {
     private static final String TAG = "StatsService";
 
     private boolean shouldStop = false;
+    @SuppressWarnings("deprecation")
     private int prevMinute = new Date().getMinutes() - 1;
 
     private String[] projection;
@@ -138,7 +135,8 @@ public class StatsService extends Service implements Runnable {
 
     private long writeToDB(Data data) {
         Date date = new Date();
-        int currentMin = date.getMinutes();
+
+        @SuppressWarnings("deprecation") int currentMin = date.getMinutes();
         if (prevMinute == currentMin) {
             values[1] += data.getNetwork(); // Net
             values[2] += data.getCpu(); // CPU
@@ -257,7 +255,7 @@ public class StatsService extends Service implements Runnable {
         }.start();
     }
 
-    public static double round(double val, int places) {
+    private static double round(double val, int places) {
         return new BigDecimal(val).setScale(places, BigDecimal.ROUND_HALF_DOWN).doubleValue();
     }
 }

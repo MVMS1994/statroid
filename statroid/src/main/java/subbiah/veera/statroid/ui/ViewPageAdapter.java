@@ -1,11 +1,9 @@
 package subbiah.veera.statroid.ui;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,15 +15,11 @@ import java.util.Set;
 
 public class ViewPageAdapter extends FragmentPagerAdapter {
 
-    private final FragmentManager fm;
     private ArrayList<Metrics> topics = new ArrayList<>(3);
-    private HashMap<String, Metrics> fragments = new HashMap<>();
-
-    private static ViewPageAdapter _instance;
+    private final HashMap<String, Metrics> fragments = new HashMap<>();
 
     public ViewPageAdapter(FragmentManager fm) {
         super(fm);
-        this.fm = fm;
     }
 
     @Override
@@ -68,16 +62,6 @@ public class ViewPageAdapter extends FragmentPagerAdapter {
             Metrics fragment = fragments.get(instrument);
             fragment.setData(time, yData);
         }
-    }
-
-    public void reset() {
-        for(Metrics fragment: topics) {
-            FragmentTransaction trans = fm.beginTransaction();
-            trans.remove(fragment);
-            trans.commitAllowingStateLoss();
-        }
-        fragments.clear();
-        topics.clear();
     }
 
     public ArrayList<Metrics> exportList() {

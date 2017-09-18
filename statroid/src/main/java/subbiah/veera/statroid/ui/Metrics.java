@@ -7,6 +7,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -135,16 +136,17 @@ public class Metrics extends Fragment implements Parcelable {
 
         List<Entry> entries = new ArrayList<>();
         for (int i = 0; i < xData.length; i++) {
+            //noinspection deprecation
             Logger.d(TAG, "initCPUGraph:" + new Date(xData[i]).getMinutes());
             entries.add(new Entry(xData[i], (float) yData[i]));
         }
 
         LineDataSet dataSet = new LineDataSet(entries, "CPU Usage history");
-        dataSet.setColor(getResources().getColor(R.color.colorAccentDark));
+        dataSet.setColor(ContextCompat.getColor(getContext(), R.color.colorAccentDark));
         dataSet.setDrawValues(false);
         dataSet.setDrawFilled(true);
-        dataSet.setCircleColor(getResources().getColor(R.color.colorPrimaryLight));
-        dataSet.setFillColor(getResources().getColor(R.color.colorAccentLight));
+        dataSet.setCircleColor(ContextCompat.getColor(getContext(), R.color.colorPrimaryLight));
+        dataSet.setFillColor(ContextCompat.getColor(getContext(), R.color.colorAccentLight));
         dataSet.setLineWidth(2f);
 
         LineData lineData = new LineData(dataSet);
@@ -204,7 +206,7 @@ public class Metrics extends Fragment implements Parcelable {
         entries.add(new PieEntry(100 - (Float) dataObjects[0], "Free RAM"));
 
         PieDataSet dataSet = new PieDataSet(entries, "");
-        dataSet.setColors(getResources().getColor(R.color.colorPrimaryLight), getResources().getColor(R.color.colorAccentDark));
+        dataSet.setColors(ContextCompat.getColor(getContext(), R.color.colorPrimaryLight), ContextCompat.getColor(getContext(), R.color.colorAccentDark));
         dataSet.setValueTextColor(Color.WHITE);
         dataSet.setValueTextSize(12);
         dataSet.setSliceSpace(2);

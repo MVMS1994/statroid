@@ -67,14 +67,4 @@
 
     </android.support.design.widget.CoordinatorLayout>
 
-    <TextView
-        android:id="@+id/answer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="¡"
-        android:textAlignment="center"
-        android:textColor="@android:color/black"
-        android:textSize="16sp"
-        android:visibility="invisible" />
-
 </RelativeLayout>

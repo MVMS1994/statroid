@@ -1,34 +1,27 @@
 package subbiah.veera.statroid;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
-import android.os.PersistableBundle;
-import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 import io.fabric.sdk.android.Fabric;
 import subbiah.veera.statroid.core.StatsService;
 import subbiah.veera.statroid.core.SystemUtils;
 import subbiah.veera.statroid.data.Constants;
-import subbiah.veera.statroid.data.Data;
 import subbiah.veera.statroid.data.Logger;
 import subbiah.veera.statroid.ui.Metrics;
 import subbiah.veera.statroid.ui.ViewPageAdapter;
-
-import static subbiah.veera.statroid.data.Constants.ServiceConstants.UPDATE_GRAPH;
 
 public class MainActivity extends AppCompatActivity {
     @SuppressWarnings("unused")
@@ -84,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
     }
 
+    @SuppressWarnings("UnusedParameters")
     public void showInfo(View view) {
         String adb = "adb connect " +
                 SystemUtils.getIpAddr(this) + ":" +
@@ -98,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void setupViewPager(ViewPager viewPager) {
+    private void setupViewPager() {
         viewPageAdapter.addFragment(new Metrics(), Constants.CPU);
         viewPageAdapter.addFragment(new Metrics(), Constants.RAM);
         viewPageAdapter.addFragment(new Metrics(), Constants.NET);
@@ -117,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
         setupTabIcons(tabLayout);
     }
 
+    @SuppressWarnings("unchecked")
     private void initPageViewer(Bundle savedInstanceState) {
         viewPager = (ViewPager) findViewById(R.id.content);
         viewPageAdapter = new ViewPageAdapter(getSupportFragmentManager());
@@ -125,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
             ArrayList<Metrics> retainedPages = (ArrayList<Metrics>) savedInstanceState.getSerializable("retainedPages");
             viewPageAdapter.importList(retainedPages);
         } else {
-            setupViewPager(viewPager);
+            setupViewPager();
         }
 
         viewPager.setAdapter(viewPageAdapter);
@@ -133,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitleTextColor(getResources().getColor(android.R.color.white));
+        toolbar.setTitleTextColor(ContextCompat.getColor(this, android.R.color.white));
         setSupportActionBar(toolbar);
     }
 }

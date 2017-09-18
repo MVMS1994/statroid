@@ -2,7 +2,6 @@ package subbiah.veera.statroid;
 
 import android.app.Activity;
 import android.app.Application;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 /**
