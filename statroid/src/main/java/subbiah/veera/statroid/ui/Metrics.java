@@ -124,6 +124,8 @@ public class Metrics extends Fragment implements Parcelable, Runnable {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        db = DBHelper.init(getContext(), READ);
         if(stopRunning) {
             stopRunning = false;
             runningThread = new Thread(this, "ui_" + instrument);
@@ -293,9 +295,6 @@ public class Metrics extends Fragment implements Parcelable, Runnable {
             projection[0] = TIME;
             projection[1] = NET;
         }
-        Logger.d(TAG, "doInBackground: db status " + DBHelper.isClosed(READ));
-        if(db == null || DBHelper.isClosed(READ))
-            db = DBHelper.init(getContext(), READ);
 
         if (db != null && !instrument.equals(RAM))
             cursor = db.read(projection, TIME + " > ?", new String[]{"" + (new Date().getTime() - 1000 * 60 * 60)}, TIME);

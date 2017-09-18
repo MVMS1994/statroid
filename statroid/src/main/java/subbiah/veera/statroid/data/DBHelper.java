@@ -88,6 +88,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public void reset(int MODE) {
+        Logger.d(TAG, "reset: closing db");
         if(MODE == READ) {
             readInstance = null;
         } else {

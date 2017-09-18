@@ -75,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
         Statroid.setActivityAlive(false);
         ((Statroid) getApplication()).setCurrentActivity(null);
         if (db != null) {
-            Logger.d(TAG, "onDestroy: Closing db");
             db.reset(READ);
         }
 
