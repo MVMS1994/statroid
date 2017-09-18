@@ -76,7 +76,7 @@ public class StatsService extends Service implements Runnable {
         batteryinfo();
         raminfo(this);
 
-        new Thread(this).start();
+        new Thread(this, "stats_service").start();
     }
 
     @Override

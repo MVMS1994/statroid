@@ -25,7 +25,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private static DBHelper writeInstance;
     private static DBHelper readInstance;
 
-    public static DBHelper init(Context context, int MODE) {
+    public static synchronized DBHelper init(Context context, int MODE) {
         if(MODE == READ && readInstance != null)
             return readInstance;
         else if(MODE == WRITE && writeInstance != null)
@@ -35,14 +35,12 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private DBHelper(Context context, int MODE) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        synchronized (this) {
-            if (MODE == READ) {
-                db = getReadableDatabase();
-                readInstance = this;
-            } else {
-                db = getWritableDatabase();
-                writeInstance = this;
-            }
+        if (MODE == READ) {
+            db = getReadableDatabase();
+            readInstance = this;
+        } else {
+            db = getWritableDatabase();
+            writeInstance = this;
         }
     }
 
@@ -58,7 +56,10 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public Cursor read(String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        return db.query(TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+        if(db.isOpen())
+            return db.query(TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+        else
+            return null;
     }
 
     public long write(String[] projection, double[] values) {
@@ -87,11 +88,19 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public void reset(int MODE) {
-        db.close();
         if(MODE == READ) {
             readInstance = null;
         } else {
             writeInstance = null;
+        }
+        db.close();
+    }
+
+    public static boolean isClosed(int MODE) {
+        if(MODE == READ) {
+            return readInstance == null || readInstance.db == null || !readInstance.db.isOpen();
+        } else {
+            return writeInstance == null || writeInstance.db == null || !writeInstance.db.isOpen();
         }
     }
 }

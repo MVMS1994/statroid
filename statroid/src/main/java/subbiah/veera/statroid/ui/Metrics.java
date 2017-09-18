@@ -61,7 +61,8 @@ public class Metrics extends Fragment implements Parcelable, Runnable {
     private String instrument;
     private double[] yData = new double[0];
     private long[] timeInterval = new long[0];
-    private volatile boolean stopRunning = false;
+    private volatile boolean stopRunning = true;
+    private Thread runningThread;
     @Nullable DBHelper db;
 
     public Metrics() {
@@ -123,8 +124,13 @@ public class Metrics extends Fragment implements Parcelable, Runnable {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        stopRunning = false;
-        new Thread(this).start();
+        if(stopRunning) {
+            stopRunning = false;
+            runningThread = new Thread(this, "ui_" + instrument);
+            runningThread.start();
+        } else {
+            runningThread.interrupt();
+        }
     }
 
     @Override
@@ -278,61 +284,49 @@ public class Metrics extends Fragment implements Parcelable, Runnable {
     }
 
     private void readFromDB() {
-        if(db == null)
+        Cursor cursor = null;
+        String[] projection = new String[2];
+        if(instrument.equals(Constants.CPU)) {
+            projection[0] = TIME;
+            projection[1] = CPU;
+        } else if(instrument.equals(Constants.NET)) {
+            projection[0] = TIME;
+            projection[1] = NET;
+        }
+        Logger.d(TAG, "doInBackground: db status " + DBHelper.isClosed(READ));
+        if(db == null || DBHelper.isClosed(READ))
             db = DBHelper.init(getContext(), READ);
 
-        new AsyncTask<Void, Void, Cursor>() {
+        if (db != null && !instrument.equals(RAM))
+            cursor = db.read(projection, TIME + " > ?", new String[]{"" + (new Date().getTime() - 1000 * 60 * 60)}, TIME);
 
-            @Nullable
-            @Override
-            protected Cursor doInBackground(Void... params) {
-                String[] projection = new String[2];
-                if(instrument.equals(Constants.CPU)) {
-                    projection[0] = TIME;
-                    projection[1] = CPU;
-                } else if(instrument.equals(Constants.NET)) {
-                    projection[0] = TIME;
-                    projection[1] = NET;
-                }
 
-                if (db != null && !instrument.equals(RAM))
-                    return db.read(projection, TIME + " > ?", new String[]{"" + (new Date().getTime() - 1000 * 60 * 60)}, TIME);
+        if(cursor != null) {
+            long[] time = new long[cursor.getCount()];
+            double[] yData = new double[cursor.getCount()];
 
-                return null;
+            for(int i=0; cursor.moveToNext(); i++) {
+                time[i] = cursor.getLong(0);
+                yData[i] = cursor.getDouble(1);
             }
 
-
-            @Override
-            protected void onPostExecute(@Nullable Cursor cursor) {
-                super.onPostExecute(cursor);
-                if(cursor != null) {
-                    long[] time = new long[cursor.getCount()];
-                    double[] yData = new double[cursor.getCount()];
-
-                    for(int i=0; cursor.moveToNext(); i++) {
-                        time[i] = cursor.getLong(0);
-                        yData[i] = cursor.getDouble(1);
-                    }
-
-                    setData(time, yData);
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            drawGraph();
-                        }
-                    });
+            setData(time, yData);
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    drawGraph();
                 }
-                if(instrument.equals(Constants.RAM)) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            drawGraph();
-                        }
-                    });
-                }
-            }
-        }.execute();
+            });
+        }
 
+        if(instrument.equals(Constants.RAM)) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    drawGraph();
+                }
+            });
+        }
     }
 
     @Override
