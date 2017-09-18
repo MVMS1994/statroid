@@ -21,7 +21,7 @@ import static subbiah.veera.statroid.data.Constants.DBConstants.WRITE;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "DBHelper";
-    private SQLiteDatabase db;
+    private final SQLiteDatabase db;
     private static DBHelper writeInstance;
     private static DBHelper readInstance;
 

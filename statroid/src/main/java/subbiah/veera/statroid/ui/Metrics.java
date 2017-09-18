@@ -2,9 +2,7 @@ package subbiah.veera.statroid.ui;
 
 import android.annotation.SuppressLint;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -63,7 +61,8 @@ public class Metrics extends Fragment implements Parcelable, Runnable {
     private long[] timeInterval = new long[0];
     private volatile boolean stopRunning = true;
     private Thread runningThread;
-    @Nullable DBHelper db;
+    @Nullable
+    private DBHelper db;
 
     public Metrics() {
     }

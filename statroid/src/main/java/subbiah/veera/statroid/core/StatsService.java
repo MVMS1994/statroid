@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.TrafficStats;
 import android.os.BatteryManager;
 import android.os.IBinder;
