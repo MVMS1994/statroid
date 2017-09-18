@@ -41,9 +41,9 @@ import java.util.Locale;
 import subbiah.veera.statroid.R;
 import subbiah.veera.statroid.data.Constants;
 import subbiah.veera.statroid.data.DBHelper;
+import subbiah.veera.statroid.data.Data;
 import subbiah.veera.statroid.data.Logger;
 
-import static java.lang.Thread.State.TIMED_WAITING;
 import static subbiah.veera.statroid.data.Constants.DBConstants.CPU;
 import static subbiah.veera.statroid.data.Constants.DBConstants.READ;
 import static subbiah.veera.statroid.data.Constants.DBConstants.TIME;
@@ -64,6 +64,8 @@ public class Metrics extends Fragment implements Parcelable, Runnable {
     private Thread runningThread;
     @Nullable
     private DBHelper db;
+    private boolean chartDrawn = false;
+    private Chart chart;
 
     public Metrics() {
     }
@@ -122,17 +124,11 @@ public class Metrics extends Fragment implements Parcelable, Runnable {
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        db = DBHelper.init(getContext(), READ);
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
         try {
             stopRunning = true;
+            chartDrawn = false;
             runningThread.interrupt();
             runningThread.join();
         } catch (InterruptedException ignored) {} finally {
@@ -145,7 +141,14 @@ public class Metrics extends Fragment implements Parcelable, Runnable {
 
     @Override
     public void onResume() {
+        if (instrument.equals(Constants.CPU)) {
+            chart = (LineChart) getActivity().findViewById(R.id.cpu_chart);
+        } else if (instrument.equals(RAM)) {
+            chart = (PieChart) getActivity().findViewById(R.id.ram_chart);
+        }
+
         super.onResume();
+        db = DBHelper.init(getContext(), READ);
         stopRunning = false;
         if(runningThread == null) {
             runningThread = new Thread(this, "ui_" + instrument);
@@ -157,42 +160,22 @@ public class Metrics extends Fragment implements Parcelable, Runnable {
         }
     }
 
-    @Nullable
-    private DataSet drawGraph() {
-        Chart chart = null;
-        DataSet dataSet = null;
-
-        if (instrument.equals(Constants.CPU)) {
-            chart = (LineChart) getActivity().findViewById(R.id.cpu_chart);
-            dataSet = initCPUGraph((LineChart) chart, timeInterval, yData);
-        } else if (instrument.equals(RAM)) {
-            chart = (PieChart) getActivity().findViewById(R.id.ram_chart);
-            dataSet = initRAMGraph((PieChart) chart, getData());
-        }
-
-        if (chart != null)
+    private void drawGraph() {
+        if (chart != null) {
+            if (instrument.equals(Constants.CPU)) {
+                initCPUGraph((LineChart) chart, timeInterval, yData);
+            } else if (instrument.equals(RAM)) {
+                initRAMGraph((PieChart) chart, (float) Data.init().getRam(), (float) Data.init().getTotalRam());
+            }
             drawChart(chart);
-
-        return dataSet;
-    }
-
-    private Object[] getData() {
-        switch (instrument) {
-            case RAM:
-                return new Float[]{Float.valueOf(80)};
-            default:
-                return new Float[]{Float.valueOf(80), Float.valueOf(20)};
         }
     }
 
-    @Nullable
-    private LineDataSet initCPUGraph(final LineChart chart, long[] xData, double[] yData) {
-        if (xData.length != yData.length || yData.length == 0) return null;
+    private void initCPUGraph(final LineChart chart, long[] xData, double[] yData) {
+        if (xData.length != yData.length || yData.length == 0) return;
 
         List<Entry> entries = new ArrayList<>();
         for (int i = 0; i < xData.length; i++) {
-            //noinspection deprecation
-            Logger.d(TAG, "initCPUGraph:" + new Date(xData[i]).getMinutes());
             entries.add(new Entry(xData[i], (float) yData[i]));
         }
 
@@ -205,60 +188,56 @@ public class Metrics extends Fragment implements Parcelable, Runnable {
         dataSet.setLineWidth(2f);
 
         LineData lineData = new LineData(dataSet);
-        final Description desc = new Description();
-//        desc.setPosition(chart.getViewPortHandler().contentRight() - 10, chart.getViewPortHandler().contentTop() - 10);
-        desc.setText("");
-
-
-        XAxis x = chart.getXAxis();
-        x.setPosition(XAxis.XAxisPosition.BOTTOM);
-        x.setAxisLineWidth(1.5f);
-        x.setDrawGridLines(false);
-        x.setTextSize(12);
-        x.setValueFormatter(new IAxisValueFormatter() {
-            @Override
-            public String getFormattedValue(float value, AxisBase axis) {
-                return getDate((long) value);
-            }
-        });
-
-        final YAxis left = chart.getAxisLeft();
-        left.setAxisMinimum(0);
-        left.setAxisMaximum(100);
-        left.setAxisLineWidth(1.5f);
-        left.setTextSize(12);
-
-        YAxis right = chart.getAxisRight();
-        right.setDrawLabels(false);
-        right.setDrawGridLines(false);
-
         chart.setData(lineData);
-        chart.setScaleYEnabled(false);
-        chart.setPinchZoom(false);
-        chart.setDoubleTapToZoomEnabled(false);
-        chart.setDescription(desc);
-        chart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
-            @Override
-            public void onValueSelected(Entry e, Highlight h) {
-                desc.setText("CPU - " + e.getY() + "; Time - " + getDate((long) e.getX()));
-                chart.setDescription(desc);
-            }
 
-            @Override
-            public void onNothingSelected() {
-                desc.setText("");
-                chart.setDescription(desc);
-            }
-        });
+        if(!chartDrawn) {
+            final Description desc = new Description();
+            // desc.setPosition(chart.getViewPortHandler().contentRight() - 10, chart.getViewPortHandler().contentTop() - 10);
+            desc.setText("");
 
-        return dataSet;
+
+            XAxis x = chart.getXAxis();
+            x.setPosition(XAxis.XAxisPosition.BOTTOM);
+            x.setAxisLineWidth(1.5f);
+            x.setDrawGridLines(false);
+            x.setTextSize(12);
+            x.setValueFormatter((value, axis) -> getDate((long) value));
+
+            final YAxis left = chart.getAxisLeft();
+            left.setAxisMinimum(0);
+            left.setAxisMaximum(100);
+            left.setAxisLineWidth(1.5f);
+            left.setTextSize(12);
+
+            YAxis right = chart.getAxisRight();
+            right.setDrawLabels(false);
+            right.setDrawGridLines(false);
+
+            chart.setScaleYEnabled(false);
+            chart.setPinchZoom(false);
+            chart.setDoubleTapToZoomEnabled(false);
+            chart.setDescription(desc);
+            chart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+                @Override
+                public void onValueSelected(Entry e, Highlight h) {
+                    desc.setText("CPU - " + e.getY() + "; Time - " + getDate((long) e.getX()));
+                    chart.setDescription(desc);
+                }
+
+                @Override
+                public void onNothingSelected() {
+                    desc.setText("");
+                    chart.setDescription(desc);
+                }
+            });
+        }
     }
 
-    private PieDataSet initRAMGraph(PieChart chart, Object[] dataObjects) {
+    private void initRAMGraph(PieChart chart, float free, float tot) {
 
         ArrayList<PieEntry> entries = new ArrayList<>();
-        entries.add(new PieEntry((Float) dataObjects[0], "Used RAM"));
-        entries.add(new PieEntry(100 - (Float) dataObjects[0], "Free RAM"));
+        entries.add(new PieEntry(tot - free, "Used RAM"));
+        entries.add(new PieEntry(free, "Free RAM"));
 
         PieDataSet dataSet = new PieDataSet(entries, "");
         dataSet.setColors(ContextCompat.getColor(getContext(), R.color.colorPrimaryLight), ContextCompat.getColor(getContext(), R.color.colorAccentDark));
@@ -266,22 +245,25 @@ public class Metrics extends Fragment implements Parcelable, Runnable {
         dataSet.setValueTextSize(12);
         dataSet.setSliceSpace(2);
 
-        chart.setData(new PieData(dataSet));
-        chart.setRotationEnabled(false);
-        chart.setDrawHoleEnabled(true);
-        chart.setHoleColor(Color.WHITE);
-        chart.animateY(1400, Easing.EasingOption.EaseInOutQuad);
-        chart.getDescription().setEnabled(false);
-        chart.getLegend().setEnabled(false);
-        chart.setDrawCenterText(true);
-        chart.setExtraOffsets(10, 10, 10, 10);
-        chart.setCenterText("RAM Usage history");
 
-        return dataSet;
+        chart.setData(new PieData(dataSet));
+
+        if(!chartDrawn) {
+            chart.setRotationEnabled(false);
+            chart.setDrawHoleEnabled(true);
+            chart.setHoleColor(Color.WHITE);
+            chart.animateY(1400, Easing.EasingOption.EaseInOutQuad);
+            chart.getLegend().setEnabled(true);
+            chart.getDescription().setEnabled(false);
+            chart.setDrawCenterText(true);
+            chart.setExtraOffsets(10, 10, 10, 10);
+            chart.setCenterText("RAM Usage");
+        }
     }
 
     private void drawChart(Chart chart) {
         chart.invalidate();
+        chartDrawn = true;
     }
 
     public void setData(long[] time, double[] yData) {
@@ -324,21 +306,11 @@ public class Metrics extends Fragment implements Parcelable, Runnable {
             }
 
             setData(time, yData);
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    drawGraph();
-                }
-            });
+            getActivity().runOnUiThread(this::drawGraph);
         }
 
         if(instrument.equals(Constants.RAM)) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    drawGraph();
-                }
-            });
+            getActivity().runOnUiThread(this::drawGraph);
         }
     }
 

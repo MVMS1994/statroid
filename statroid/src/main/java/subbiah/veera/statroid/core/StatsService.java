@@ -54,9 +54,14 @@ public class StatsService extends Service implements Runnable {
         projection = new String[]{TIME, NET, CPU};
         values = new double[]{0, 0, 0};
 
+        ActivityManager actManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
+        actManager.getMemoryInfo(memInfo);
+
         NotificationManager.reset(this);
-        data = new Data();
+        data = Data.init();
         data.setKey("stats");
+        data.setTotalRam(round(memInfo.totalMem / (1024 * 1024 * 1024.0), 2));
 
         battery = new BroadcastReceiver() {
             @Override
@@ -96,6 +101,7 @@ public class StatsService extends Service implements Runnable {
             db.reset(WRITE);
         }
         db = null;
+        Data.reset();
 
         // restartService();
         super.onTaskRemoved(rootIntent);

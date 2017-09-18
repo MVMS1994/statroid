@@ -6,12 +6,27 @@ package subbiah.veera.statroid.data;
 
 @SuppressWarnings("SameParameterValue")
 public class Data {
+    private static Data _instance;
     private double network = 0;
     private double cpu = 0;
     private double ram = 0;
     private String key = "NA";
     private double bat = 0;
     private String networkUnit = "";
+    private double totalRam;
+
+    private Data() {}
+
+    public static Data init() {
+        if(_instance == null) {
+            _instance = new Data();
+        }
+        return _instance;
+    }
+
+    public static void reset() {
+        _instance = null;
+    }
 
     @Override
     public String toString() {
@@ -68,5 +83,13 @@ public class Data {
 
     public String getNetworkUnit() {
         return networkUnit;
+    }
+
+    public void setTotalRam(double totalRam) {
+        this.totalRam = totalRam;
+    }
+
+    public double getTotalRam() {
+        return totalRam;
     }
 }
