@@ -111,23 +111,6 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.getTabAt(2).setIcon(R.drawable.ic_network_check_black_24dp);
     }
 
-    public void updateData(Cursor cursor, Data data) {
-        long[] time = new long[cursor.getCount()];
-        double[] cpu = new double[cursor.getCount()];
-        double[] net = new double[cursor.getCount()];
-
-        for (int i = 0; cursor.moveToNext(); i++) {
-            time[i] = cursor.getLong(0);
-            net[i] = StatsService.round(cursor.getDouble(1), 1);
-            cpu[i] = StatsService.round(cursor.getDouble(2), 1);
-        }
-
-        if (viewPageAdapter != null) {
-            viewPageAdapter.addDataToFragment(time, cpu, Constants.CPU);
-            viewPageAdapter.addDataToFragment(time, net, Constants.NET);
-        }
-    }
-
     private void initTabLayout() {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         tabLayout.setupWithViewPager(viewPager);
@@ -152,13 +135,6 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(getResources().getColor(android.R.color.white));
         setSupportActionBar(toolbar);
-    }
-
-
-    public void fetchData() {
-        Intent intent = new Intent(this, StatsService.class);
-        intent.setAction(UPDATE_GRAPH);
-        startService(intent);
     }
 }
 

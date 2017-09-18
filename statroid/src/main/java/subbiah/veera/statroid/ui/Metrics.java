@@ -1,9 +1,10 @@
 package subbiah.veera.statroid.ui;
 
-import android.app.Activity;
-import android.content.Context;
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -35,7 +36,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import subbiah.veera.statroid.MainActivity;
 import subbiah.veera.statroid.R;
 import subbiah.veera.statroid.data.Constants;
 import subbiah.veera.statroid.data.Logger;
@@ -44,13 +44,35 @@ import subbiah.veera.statroid.data.Logger;
  * Created by Veera.Subbiah on 16/09/17.
  */
 
-public class Metrics extends Fragment {
+public class Metrics extends Fragment implements Parcelable {
 
     private static final String TAG = "Metrics";
     private String instrument;
     private double[] yData = new double[0];
     private long[] timeInterval = new long[0];
-    private Activity activity;
+
+    public Metrics() {
+    }
+
+    @SuppressLint("ValidFragment")
+    private Metrics(Parcel in) {
+        super();
+        instrument = in.readString();
+        yData = in.createDoubleArray();
+        timeInterval = in.createLongArray();
+    }
+
+    public static final Creator<Metrics> CREATOR = new Creator<Metrics>() {
+        @Override
+        public Metrics createFromParcel(Parcel in) {
+            return new Metrics(in);
+        }
+
+        @Override
+        public Metrics[] newArray(int size) {
+            return new Metrics[size];
+        }
+    };
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -74,11 +96,9 @@ public class Metrics extends Fragment {
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        Logger.d(TAG, "onAttach() called with: context = [" + context + "]");
-
-        activity = (Activity) context;
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        drawGraph();
     }
 
     @Nullable
@@ -87,10 +107,10 @@ public class Metrics extends Fragment {
         DataSet dataSet = null;
 
         if (instrument.equals(Constants.CPU)) {
-            chart = (LineChart) activity.findViewById(R.id.cpu_chart);
+            chart = (LineChart) getActivity().findViewById(R.id.cpu_chart);
             dataSet = initCPUGraph((LineChart) chart, timeInterval, yData);
         } else if (instrument.equals(Constants.RAM)) {
-            chart = (PieChart) activity.findViewById(R.id.ram_chart);
+            chart = (PieChart) getActivity().findViewById(R.id.ram_chart);
             dataSet = initRAMGraph((PieChart) chart, getData());
         }
 
@@ -210,17 +230,6 @@ public class Metrics extends Fragment {
     public void setData(long[] time, double[] yData) {
         this.yData = yData;
         this.timeInterval = time;
-
-        if(activity != null) {
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    drawGraph();
-                }
-            });
-        } else {
-            Logger.d(TAG, "setData: null " + this);
-        }
     }
 
     private static String getDate(long value) {
@@ -231,5 +240,17 @@ public class Metrics extends Fragment {
 
     public String getInstrument() {
         return instrument;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(instrument);
+        dest.writeDoubleArray(yData);
+        dest.writeLongArray(timeInterval);
     }
 }
