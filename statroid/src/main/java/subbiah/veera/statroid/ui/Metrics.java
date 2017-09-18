@@ -1,7 +1,6 @@
 package subbiah.veera.statroid.ui;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -19,18 +18,15 @@ import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.DataSet;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
-import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
@@ -80,7 +76,7 @@ public class Metrics extends Fragment implements Parcelable, Runnable {
         timeInterval = in.createLongArray();
     }
 
-    public static final Creator<Metrics> CREATOR = new Creator<Metrics>() {
+    public static Creator<Metrics> CREATOR = new Creator<Metrics>() {
         @Override
         public Metrics createFromParcel(Parcel in) {
             return new Metrics(in);
@@ -137,8 +133,17 @@ public class Metrics extends Fragment implements Parcelable, Runnable {
             if(isRemoving()) {
                 runningThread = null;
                 db = null;
+                CREATOR = null;
             }
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        runningThread = null;
+        db = null;
+        CREATOR = null;
     }
 
     @Override

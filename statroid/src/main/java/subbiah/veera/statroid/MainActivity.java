@@ -67,17 +67,14 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
 
         Statroid.setActivityVisible(false);
-    }
 
-    @Override
-    protected void onDestroy() {
-        Statroid.setActivityAlive(false);
-        ((Statroid) getApplication()).setCurrentActivity(null);
-        if (db != null) {
-            db.reset(READ);
+        if(isFinishing()) {
+            Statroid.setActivityAlive(false);
+            ((Statroid) getApplication()).setCurrentActivity(null);
+            if (db != null) {
+                db.reset(READ);
+            }
         }
-
-        super.onDestroy();
     }
 
     @Override

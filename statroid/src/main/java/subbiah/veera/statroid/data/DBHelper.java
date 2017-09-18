@@ -95,6 +95,7 @@ public class DBHelper extends SQLiteOpenHelper {
             writeInstance = null;
         }
         db.close();
+
     }
 
     public static boolean isClosed(int MODE) {
