@@ -1,7 +1,9 @@
 package subbiah.veera.statroid;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
@@ -19,15 +21,19 @@ import io.fabric.sdk.android.Fabric;
 import subbiah.veera.statroid.core.StatsService;
 import subbiah.veera.statroid.core.SystemUtils;
 import subbiah.veera.statroid.data.Constants;
+import subbiah.veera.statroid.data.DBHelper;
 import subbiah.veera.statroid.data.Logger;
 import subbiah.veera.statroid.ui.Metrics;
 import subbiah.veera.statroid.ui.ViewPageAdapter;
+
+import static subbiah.veera.statroid.data.Constants.DBConstants.READ;
 
 public class MainActivity extends AppCompatActivity {
     @SuppressWarnings("unused")
     private static final String TAG = "MainActivity";
     private ViewPageAdapter viewPageAdapter;
     private ViewPager viewPager;
+    @Nullable private DBHelper db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
         Logger.d(TAG, "onCreate() called with: savedInstanceState = [" + savedInstanceState + "]");
         Statroid.setActivityAlive(true);
         ((Statroid) getApplication()).setCurrentActivity(this);
+        db = DBHelper.init(this, READ);
 
         CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build();
         Fabric.with(this, new Crashlytics.Builder().core(core).build());
@@ -67,6 +74,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         Statroid.setActivityAlive(false);
         ((Statroid) getApplication()).setCurrentActivity(null);
+        if (db != null) {
+            db.reset(READ);
+        }
 
         super.onDestroy();
     }

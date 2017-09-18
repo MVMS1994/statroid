@@ -1,7 +1,10 @@
 package subbiah.veera.statroid.ui;
 
 import android.annotation.SuppressLint;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -39,18 +42,27 @@ import java.util.Locale;
 
 import subbiah.veera.statroid.R;
 import subbiah.veera.statroid.data.Constants;
+import subbiah.veera.statroid.data.DBHelper;
 import subbiah.veera.statroid.data.Logger;
+
+import static subbiah.veera.statroid.data.Constants.DBConstants.CPU;
+import static subbiah.veera.statroid.data.Constants.DBConstants.READ;
+import static subbiah.veera.statroid.data.Constants.DBConstants.TIME;
+import static subbiah.veera.statroid.data.Constants.NET;
+import static subbiah.veera.statroid.data.Constants.RAM;
 
 /**
  * Created by Veera.Subbiah on 16/09/17.
  */
 
-public class Metrics extends Fragment implements Parcelable {
+public class Metrics extends Fragment implements Parcelable, Runnable {
 
     private static final String TAG = "Metrics";
     private String instrument;
     private double[] yData = new double[0];
     private long[] timeInterval = new long[0];
+    private volatile boolean stopRunning = false;
+    @Nullable DBHelper db;
 
     public Metrics() {
     }
@@ -76,6 +88,18 @@ public class Metrics extends Fragment implements Parcelable {
     };
 
     @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(instrument);
+        dest.writeDoubleArray(yData);
+        dest.writeLongArray(timeInterval);
+    }
+
+    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
@@ -87,7 +111,7 @@ public class Metrics extends Fragment implements Parcelable {
         instrument = getArguments().getString("instrument", "");
 
         switch (instrument) {
-            case Constants.RAM:
+            case RAM:
                 return inflater.inflate(R.layout.ram_metrics, container, false);
             case Constants.CPU:
                 return inflater.inflate(R.layout.cpu_metrics, container, false);
@@ -99,7 +123,16 @@ public class Metrics extends Fragment implements Parcelable {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        drawGraph();
+        stopRunning = false;
+        new Thread(this).start();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(isRemoving()) {
+            stopRunning = true;
+        }
     }
 
     @Nullable
@@ -110,7 +143,7 @@ public class Metrics extends Fragment implements Parcelable {
         if (instrument.equals(Constants.CPU)) {
             chart = (LineChart) getActivity().findViewById(R.id.cpu_chart);
             dataSet = initCPUGraph((LineChart) chart, timeInterval, yData);
-        } else if (instrument.equals(Constants.RAM)) {
+        } else if (instrument.equals(RAM)) {
             chart = (PieChart) getActivity().findViewById(R.id.ram_chart);
             dataSet = initRAMGraph((PieChart) chart, getData());
         }
@@ -123,7 +156,7 @@ public class Metrics extends Fragment implements Parcelable {
 
     private Object[] getData() {
         switch (instrument) {
-            case Constants.RAM:
+            case RAM:
                 return new Float[]{Float.valueOf(80)};
             default:
                 return new Float[]{Float.valueOf(80), Float.valueOf(20)};
@@ -244,15 +277,73 @@ public class Metrics extends Fragment implements Parcelable {
         return instrument;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    private void readFromDB() {
+        if(db == null)
+            db = DBHelper.init(getContext(), READ);
+
+        new AsyncTask<Void, Void, Cursor>() {
+
+            @Nullable
+            @Override
+            protected Cursor doInBackground(Void... params) {
+                String[] projection = new String[2];
+                if(instrument.equals(Constants.CPU)) {
+                    projection[0] = TIME;
+                    projection[1] = CPU;
+                } else if(instrument.equals(Constants.NET)) {
+                    projection[0] = TIME;
+                    projection[1] = NET;
+                }
+
+                if (db != null && !instrument.equals(RAM))
+                    return db.read(projection, TIME + " > ?", new String[]{"" + (new Date().getTime() - 1000 * 60 * 60)}, TIME);
+
+                return null;
+            }
+
+
+            @Override
+            protected void onPostExecute(@Nullable Cursor cursor) {
+                super.onPostExecute(cursor);
+                if(cursor != null) {
+                    long[] time = new long[cursor.getCount()];
+                    double[] yData = new double[cursor.getCount()];
+
+                    for(int i=0; cursor.moveToNext(); i++) {
+                        time[i] = cursor.getLong(0);
+                        yData[i] = cursor.getDouble(1);
+                    }
+
+                    setData(time, yData);
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            drawGraph();
+                        }
+                    });
+                }
+                if(instrument.equals(Constants.RAM)) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            drawGraph();
+                        }
+                    });
+                }
+            }
+        }.execute();
+
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(instrument);
-        dest.writeDoubleArray(yData);
-        dest.writeLongArray(timeInterval);
+    public void run() {
+        while(!stopRunning) {
+            try {
+                readFromDB();
+                Thread.sleep(60 * 1000);
+            } catch (InterruptedException e) {
+                Logger.e(TAG, "run: ", e);
+            }
+        }
     }
 }

@@ -26,6 +26,7 @@ import subbiah.veera.statroid.data.Logger;
 import static subbiah.veera.statroid.data.Constants.DBConstants.CPU;
 import static subbiah.veera.statroid.data.Constants.DBConstants.NET;
 import static subbiah.veera.statroid.data.Constants.DBConstants.TIME;
+import static subbiah.veera.statroid.data.Constants.DBConstants.WRITE;
 
 /**
  * Created by Veera.Subbiah on 04/09/17.
@@ -43,14 +44,14 @@ public class StatsService extends Service implements Runnable {
 
     private volatile Data data;
     private BroadcastReceiver battery;
-    @Nullable private SQLiteDatabase db = null;
+    @Nullable private DBHelper db = null;
 
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        db = DBHelper.init(this);
+        db = DBHelper.init(this, WRITE);
         projection = new String[]{TIME, NET, CPU};
         values = new double[]{0, 0, 0};
 
@@ -92,7 +93,9 @@ public class StatsService extends Service implements Runnable {
         } catch (IllegalArgumentException e) {
             Logger.d(TAG, "battery Receiver not registered");
         }
-        DBHelper.reset(db);
+        if (db != null) {
+            db.reset(WRITE);
+        }
         db = null;
 
         // restartService();
@@ -128,7 +131,7 @@ public class StatsService extends Service implements Runnable {
     @Nullable
     private Cursor readFromDB() {
         if(db != null)
-            return DBHelper.read(projection, TIME + " > ?", new String[]{"" + (new Date().getTime() - 1000 * 60 * 60)}, TIME, db);
+            return db.read(projection, TIME + " > ?", new String[]{"" + (new Date().getTime() - 1000 * 60 * 60)}, TIME);
 
         return null;
     }
@@ -146,7 +149,7 @@ public class StatsService extends Service implements Runnable {
                 values[1] /= 60.0; // Net
                 values[2] /= 60.0; // CPU
                 prevMinute = currentMin;
-                return DBHelper.write(projection, values, db);
+                return db.write(projection, values);
             }
         }
         return -1;

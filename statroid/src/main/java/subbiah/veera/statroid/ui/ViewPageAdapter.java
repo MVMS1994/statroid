@@ -1,5 +1,6 @@
 package subbiah.veera.statroid.ui;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -8,6 +9,8 @@ import android.support.v4.app.FragmentPagerAdapter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+
+import subbiah.veera.statroid.data.DBHelper;
 
 /**
  * Created by Veera.Subbiah on 16/09/17.

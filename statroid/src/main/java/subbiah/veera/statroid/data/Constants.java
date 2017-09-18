@@ -5,11 +5,14 @@ package subbiah.veera.statroid.data;
  */
 
 public class Constants {
-    public static final String CPU = "CPU";
-    public static final String RAM = "RAM";
-    public static final String NET = "NET";
+    public static final String CPU = "cpu";
+    public static final String RAM = "ram";
+    public static final String NET = "net_rate";
 
     public class DBConstants {
+        public static final int READ = 0;
+        public static final int WRITE = 1;
+
         static final int DATABASE_VERSION = 1;
         static final String DATABASE_NAME = "Statroid.db";
 
@@ -17,8 +20,8 @@ public class Constants {
 
         public static final String _ID = "id";
         public static final String TIME = "time";
-        public static final String NET = "net_rate";
-        public static final String CPU = "cpu";
+        public static final String NET = Constants.NET;
+        public static final String CPU = Constants.CPU;
 
 
         static final String SQL_CREATE_ENTRIES =
