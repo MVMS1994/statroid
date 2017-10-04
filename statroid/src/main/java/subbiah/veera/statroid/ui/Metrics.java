@@ -274,6 +274,7 @@ public class Metrics extends Fragment implements Parcelable, Runnable {
     }
 
     public void setData(long[] time, double[] yData) {
+
         this.yData = yData;
         this.timeInterval = time;
     }
