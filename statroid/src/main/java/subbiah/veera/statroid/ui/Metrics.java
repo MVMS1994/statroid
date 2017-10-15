@@ -65,12 +65,12 @@ public class Metrics extends Fragment implements Runnable {
             case RAM:
                 webView = (WebView) getActivity().findViewById(R.id.ram_webview);
                 webView.getSettings().setJavaScriptEnabled(true);
-                webView.loadUrl("file:///android_asset/pie.html");
+                webView.loadUrl("file:///android_asset/ram.html");
                 break;
             case NET:
                 webView = (WebView) getActivity().findViewById(R.id.ram_webview);
                 webView.getSettings().setJavaScriptEnabled(true);
-                webView.loadUrl("file:///android_asset/pie.html");
+                webView.loadUrl("file:///android_asset/ram.html");
                 break;
             default:
                 break;
