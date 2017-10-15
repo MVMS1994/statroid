@@ -169,9 +169,10 @@ public class Metrics extends Fragment implements Parcelable, Runnable {
 
     private void drawGraph() {
         if (chart != null) {
-            if (instrument.equals(Constants.CPU)) {
+            /*if (instrument.equals(Constants.CPU)) {
                 initCPUGraph((LineChart) chart, timeInterval, yData);
-            } else if (instrument.equals(RAM)) {
+            } else*/
+            if (instrument.equals(RAM)) {
                 initRAMGraph((PieChart) chart, (float) Data.init().getRam(), (float) Data.init().getTotalRam());
             }
             drawChart(chart);

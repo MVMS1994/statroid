@@ -99,16 +99,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupViewPager() {
-        viewPageAdapter.addFragment(new Metrics(), Constants.CPU);
+        //viewPageAdapter.addFragment(new Metrics(), Constants.CPU);
         viewPageAdapter.addFragment(new Metrics(), Constants.RAM);
         viewPageAdapter.addFragment(new Metrics(), Constants.NET);
     }
 
     @SuppressWarnings("ConstantConditions")
     private void setupTabIcons(TabLayout tabLayout) {
-        tabLayout.getTabAt(0).setIcon(R.drawable.ic_desktop_mac_black_24dp);
-        tabLayout.getTabAt(1).setIcon(R.drawable.ic_developer_board_black_24dp);
-        tabLayout.getTabAt(2).setIcon(R.drawable.ic_network_check_black_24dp);
+        //tabLayout.getTabAt(0).setIcon(R.drawable.ic_desktop_mac_black_24dp);
+        tabLayout.getTabAt(0).setIcon(R.drawable.ic_developer_board_black_24dp);
+        tabLayout.getTabAt(1).setIcon(R.drawable.ic_network_check_black_24dp);
     }
 
     private void initTabLayout() {
