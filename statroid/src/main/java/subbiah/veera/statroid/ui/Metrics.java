@@ -50,7 +50,7 @@ public class Metrics extends Fragment implements Runnable {
             case RAM:
                 return inflater.inflate(R.layout.ram_metrics, container, false);
             case NET:
-                return inflater.inflate(R.layout.ram_metrics, container, false);
+                return inflater.inflate(R.layout.net_metrics, container, false);
             default:
                 return null;
         }
@@ -63,14 +63,14 @@ public class Metrics extends Fragment implements Runnable {
 
         switch (instrument) {
             case RAM:
-                webView = (WebView) getActivity().findViewById(R.id.ram_webview);
+                webView = getActivity().findViewById(R.id.ram_webview);
                 webView.getSettings().setJavaScriptEnabled(true);
                 webView.loadUrl("file:///android_asset/ram.html");
                 break;
             case NET:
-                webView = (WebView) getActivity().findViewById(R.id.ram_webview);
+                webView = getActivity().findViewById(R.id.net_webview);
                 webView.getSettings().setJavaScriptEnabled(true);
-                webView.loadUrl("file:///android_asset/ram.html");
+                webView.loadUrl("file:///android_asset/net.html");
                 break;
             default:
                 break;
