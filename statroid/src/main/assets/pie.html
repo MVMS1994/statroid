@@ -21,6 +21,10 @@
         google.charts.setOnLoadCallback(drawChart);
 
         function drawChart() {
+            let temp = "";
+            if(typeof window.chart != "undefined") {
+                temp = chart.getSelection();
+            }
 
             var data = google.visualization.arrayToDataTable([
                 ['Category', 'Size'],
@@ -41,12 +45,20 @@
                 height: window.innerHeight - 5,
                 width: window.innerWidth,
 				chartArea: {width: 270, height: 270},
-				fontSize: "14"
+				fontSize: "14",
+				tooltip: {
+				    trigger: 'selection'
+                },
+                crosshair: { trigger: 'selection' },
             };
 
-            var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+            if(typeof window.chart == "undefined")
+                window.chart = new google.visualization.PieChart(document.getElementById('piechart'));
 
-            chart.draw(data, options);
+            window.chart.draw(data, options);
+            if(temp != "") {
+                chart.setSelection(temp);
+            }
         }
     </script>
 </head>
