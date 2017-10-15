@@ -34,8 +34,14 @@
                 slices: {
                     1: { color: '#109618' }
                 },
-                width: 600,
-                height: 600
+                legend: {
+                    position: 'bottom',
+                    alignment: 'end'
+                },
+                height: window.innerHeight - 5,
+                width: window.innerWidth,
+				chartArea: {width: 270, height: 270},
+				fontSize: "14"
             };
 
             var chart = new google.visualization.PieChart(document.getElementById('piechart'));
