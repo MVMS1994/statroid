@@ -52,28 +52,4 @@ public class ViewPageAdapter extends FragmentPagerAdapter {
     public CharSequence getPageTitle(int position) {
         return null;
     }
-
-    public Set<String> getInstruments() {
-        return fragments.keySet();
-    }
-
-    public void addDataToFragment(long[] time, double[] yData, String instrument) {
-        if (fragments.containsKey(instrument)) {
-            Metrics fragment = fragments.get(instrument);
-            fragment.setData(time, yData);
-        }
-    }
-
-    public ArrayList<Metrics> exportList() {
-        return topics;
-    }
-
-    public void importList(ArrayList<Metrics> fragments) {
-        topics = fragments;
-        for (Metrics fragment: fragments) {
-            if(!this.fragments.containsKey(fragment.getInstrument())) {
-                this.fragments.put(fragment.getInstrument(), fragment);
-            }
-        }
-    }
 }

@@ -12,7 +12,6 @@ apply plugin: 'io.fabric'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
-    maven { url "https://jitpack.io" }
 }
 
 
@@ -29,9 +28,6 @@ android {
         targetSdkVersion 25
         versionCode 1
         versionName "2.0"
-        jackOptions {
-            enabled true
-        }
     }
 
     signingConfigs {
@@ -51,25 +47,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:design:25.3.1'
-    compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
-        transitive = true;
-    }
-    compile('com.github.PhilJay:MPAndroidChart:v3.0.2') {
-        transitive = true;
-    }
-    debugCompile ('com.squareup.leakcanary:leakcanary-android:1.5.3') {
-        transitive = true;
-    }
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.3'
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') { transitive = true; }
+    debugCompile('com.squareup.leakcanary:leakcanary-android:1.5.3') { transitive = true; }
+    releaseCompile('com.squareup.leakcanary:leakcanary-android-no-op:1.5.3') { transitive = true; }
 }

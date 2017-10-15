@@ -21,7 +21,8 @@
             android:name="subbiah.veera.statroid.MainActivity"
             android:exported="true"
             android:windowSoftInputMode="stateAlwaysHidden"
-            android:launchMode="singleInstance">
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -1,6 +1,7 @@
 package subbiah.veera.statroid;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -10,11 +11,10 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.webkit.WebView;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
-
-import java.util.ArrayList;
 
 import io.fabric.sdk.android.Fabric;
 import subbiah.veera.statroid.core.StatsService;
@@ -38,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Logger.d(TAG, "onCreate() called with: savedInstanceState = [" + savedInstanceState + "]");
         Statroid.setActivityAlive(true);
         ((Statroid) getApplication()).setCurrentActivity(this);
         db = DBHelper.init(this, READ);
@@ -48,9 +47,17 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
+        startFTPServer();
+
         initToolbar();
-        initPageViewer(savedInstanceState);
+        initPageViewer();
         initTabLayout();
+
+        if(BuildConfig.DEBUG) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                WebView.setWebContentsDebuggingEnabled(true);
+            }
+        }
     }
 
     @Override
@@ -77,12 +84,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putSerializable("retainedPages", viewPageAdapter.exportList());
-        super.onSaveInstanceState(outState);
-    }
-
     @SuppressWarnings("UnusedParameters")
     public void showInfo(View view) {
         String adb = "adb connect " +
@@ -98,15 +99,17 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
+    private void startFTPServer() {
+
+    }
+
     private void setupViewPager() {
-        //viewPageAdapter.addFragment(new Metrics(), Constants.CPU);
         viewPageAdapter.addFragment(new Metrics(), Constants.RAM);
         viewPageAdapter.addFragment(new Metrics(), Constants.NET);
     }
 
     @SuppressWarnings("ConstantConditions")
     private void setupTabIcons(TabLayout tabLayout) {
-        //tabLayout.getTabAt(0).setIcon(R.drawable.ic_desktop_mac_black_24dp);
         tabLayout.getTabAt(0).setIcon(R.drawable.ic_developer_board_black_24dp);
         tabLayout.getTabAt(1).setIcon(R.drawable.ic_network_check_black_24dp);
     }
@@ -118,17 +121,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @SuppressWarnings("unchecked")
-    private void initPageViewer(Bundle savedInstanceState) {
+    private void initPageViewer() {
         viewPager = (ViewPager) findViewById(R.id.content);
         viewPageAdapter = new ViewPageAdapter(getSupportFragmentManager());
 
-        if (savedInstanceState != null) {
-            ArrayList<Metrics> retainedPages = (ArrayList<Metrics>) savedInstanceState.getSerializable("retainedPages");
-            viewPageAdapter.importList(retainedPages);
-        } else {
-            setupViewPager();
-        }
-
+        setupViewPager();
         viewPager.setAdapter(viewPageAdapter);
     }
 
