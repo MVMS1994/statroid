@@ -21,7 +21,6 @@ import subbiah.veera.statroid.core.StatsService;
 import subbiah.veera.statroid.core.SystemUtils;
 import subbiah.veera.statroid.data.Constants;
 import subbiah.veera.statroid.data.DBHelper;
-import subbiah.veera.statroid.data.Logger;
 import subbiah.veera.statroid.ui.Metrics;
 import subbiah.veera.statroid.ui.ViewPageAdapter;
 
@@ -43,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         db = DBHelper.init(this, READ);
 
         CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build();
-        Fabric.with(this, new Crashlytics.Builder().core(core).build());
+        Fabric.with(this, new Crashlytics.Builder().core(core).build(), new Crashlytics());
 
         setContentView(R.layout.activity_main);
 
@@ -115,14 +114,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initTabLayout() {
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        TabLayout tabLayout = findViewById(R.id.tab_layout);
         tabLayout.setupWithViewPager(viewPager);
         setupTabIcons(tabLayout);
     }
 
     @SuppressWarnings("unchecked")
     private void initPageViewer() {
-        viewPager = (ViewPager) findViewById(R.id.content);
+        viewPager = findViewById(R.id.content);
         viewPageAdapter = new ViewPageAdapter(getSupportFragmentManager());
 
         setupViewPager();
