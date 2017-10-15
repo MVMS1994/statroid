@@ -30,7 +30,7 @@ public class NotificationManager {
         Context application = activity.getApplicationContext();
 
         RemoteViews remoteViews = new RemoteViews(application.getPackageName(), R.layout.notification_content);
-        remoteViews.setTextViewText(R.id.net, data.getNetwork() + data.getNetworkUnit());
+        remoteViews.setTextViewText(R.id.net, SystemUtils.convertToSuitableNetworkUnit(data.getNetwork()));
         remoteViews.setTextViewText(R.id.cpu, data.getCpu() + "%");
         remoteViews.setTextViewText(R.id.ram, data.getRam() + " GB");
         remoteViews.setTextViewText(R.id.bat, data.getBat() + "%");

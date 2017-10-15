@@ -12,7 +12,6 @@ public class Data {
     private double ram = 0;
     private String key = "NA";
     private double bat = 0;
-    private String networkUnit = "";
     private double totalRam;
 
     private Data() {}
@@ -30,7 +29,7 @@ public class Data {
 
     @Override
     public String toString() {
-        return "Network: " + getNetwork() + " " + getNetworkUnit() + "\n" +
+        return "Network: " + getNetwork() + "\n" +
                 "CPU: " + getCpu() + "\n" +
                 "RAM: " + getRam() + "\n" +
                 "Battery: " + getBat();
@@ -75,14 +74,6 @@ public class Data {
 
     public void setBat(double bat) {
         this.bat = bat;
-    }
-
-    public void setNetworkUnit(String networkUnit) {
-        this.networkUnit = networkUnit;
-    }
-
-    public String getNetworkUnit() {
-        return networkUnit;
     }
 
     public void setTotalRam(double totalRam) {

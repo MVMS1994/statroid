@@ -15,13 +15,14 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
 import subbiah.veera.statroid.data.DBHelper;
 import subbiah.veera.statroid.data.Data;
 import subbiah.veera.statroid.data.Logger;
 
+import static subbiah.veera.statroid.core.SystemUtils.convertToSuitableNetworkUnit;
+import static subbiah.veera.statroid.core.SystemUtils.round;
 import static subbiah.veera.statroid.data.Constants.DBConstants.CPU;
 import static subbiah.veera.statroid.data.Constants.DBConstants.NET;
 import static subbiah.veera.statroid.data.Constants.DBConstants.TIME;
@@ -170,28 +171,12 @@ public class StatsService extends Service implements Runnable {
                     if (prevNetwork[0] == -1) {
                         prevNetwork[0] = total;
                         data.setNetwork(0);
-                        data.setNetworkUnit("KB/s");
                     }
                     double answer = total - prevNetwork[0];
                     prevNetwork[0] = total;
 
-                    final long KB = 1024, MB = KB * 1024, GB = MB * 1024;
-                    String unit = " B/s";
-                    if (answer >= GB) {
-                        answer /= GB;
-                        unit = " GB/s";
-                    } else if (answer >= MB) {
-                        answer /= MB;
-                        unit = " MB/s";
-                    } else if (answer >= KB) {
-                        answer /= KB;
-                        unit = " KB/s";
-                    }
-
-                    Logger.d(TAG, "Net Used - " + round(answer, 1) + unit);
-                    data.setNetwork(round(answer, 1));
-                    data.setNetworkUnit(unit);
-
+                    Logger.d(TAG, "Net Used - " + convertToSuitableNetworkUnit(answer));
+                    data.setNetwork(answer);
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
@@ -261,9 +246,5 @@ public class StatsService extends Service implements Runnable {
                 }
             }
         }.start();
-    }
-
-    private static double round(double val, int places) {
-        return new BigDecimal(val).setScale(places, BigDecimal.ROUND_HALF_DOWN).doubleValue();
     }
 }

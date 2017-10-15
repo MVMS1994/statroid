@@ -9,6 +9,7 @@ import android.util.DisplayMetrics;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.nio.ByteBuffer;
@@ -91,5 +92,26 @@ public class SystemUtils {
         DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
         float px = dp * (metrics.densityDpi / 160f);
         return Math.round(px);
+    }
+
+    public static String convertToSuitableNetworkUnit(double net) {
+        final long KB = 1024, MB = KB * 1024, GB = MB * 1024;
+        String unit = " B/s";
+        if (net >= GB) {
+            net /= GB;
+            unit = " GB/s";
+        } else if (net >= MB) {
+            net /= MB;
+            unit = " MB/s";
+        } else if (net >= KB) {
+            net /= KB;
+            unit = " KB/s";
+        }
+
+        return round(net, 1) + unit;
+    }
+
+    public static double round(double val, int places) {
+        return new BigDecimal(val).setScale(places, BigDecimal.ROUND_HALF_DOWN).doubleValue();
     }
 }

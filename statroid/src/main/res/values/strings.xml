@@ -6,4 +6,6 @@
     <string name="ram">RAM</string>
     <string name="bat">Batt</string>
     <string name="info">info</string>
+    <string name="network_used">Network Used</string>
+    <string name="day">Day</string>
 </resources>
