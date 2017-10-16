@@ -2,8 +2,6 @@ package subbiah.veera.statroid.data;
 
 import android.util.Log;
 
-import com.crashlytics.android.Crashlytics;
-
 import subbiah.veera.statroid.BuildConfig;
 
 /**
@@ -25,7 +23,6 @@ public class Logger {
 
     public static void e(String tag, Object msg) {
         Log.e(tag, String.valueOf(msg));
-        Crashlytics.logException((Throwable) msg);
     }
 
     public static void e(String tag, Object msg, Throwable e) {

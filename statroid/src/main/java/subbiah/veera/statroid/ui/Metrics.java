@@ -11,6 +11,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
@@ -79,6 +80,9 @@ public class Metrics extends Fragment implements Runnable {
             case RAM:
                 this.view = getActivity().findViewById(R.id.ram_graph);
                 ((WebView) this.view).getSettings().setJavaScriptEnabled(true);
+                ((WebView) this.view).getSettings().setAppCacheEnabled(true);
+                ((WebView) this.view).getSettings().setAppCachePath(getContext().getCacheDir().getPath());
+                ((WebView) this.view).getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
                 ((WebView) this.view).loadUrl("file:///android_asset/ram.html");
                 break;
             case NET:
@@ -125,9 +129,9 @@ public class Metrics extends Fragment implements Runnable {
 
     private void ramGraph(float free, float tot) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            ((WebView) view).evaluateJavascript(String.format(Locale.US, "window.free = %f; window.tot = %f; window.redraw()", free, tot), null);
+            ((WebView) view).evaluateJavascript(String.format(Locale.US, "window.free = %f; window.tot = %f; if(typeof window.redraw == \"function\") window.redraw()", free, tot), null);
         } else {
-            ((WebView) view).loadUrl(String.format(Locale.US, "javascript:window.free = %f; window.tot = %f; window.redraw()", free, tot));
+            ((WebView) view).loadUrl(String.format(Locale.US, "javascript:window.free = %f; window.tot = %f; if(typeof window.redraw == \"function\") window.redraw()", free, tot));
         }
     }
 

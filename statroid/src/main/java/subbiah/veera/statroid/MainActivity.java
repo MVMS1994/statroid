@@ -13,10 +13,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.webkit.WebView;
 
-import com.crashlytics.android.Crashlytics;
-import com.crashlytics.android.core.CrashlyticsCore;
-
-import io.fabric.sdk.android.Fabric;
 import subbiah.veera.statroid.core.StatsService;
 import subbiah.veera.statroid.core.SystemUtils;
 import subbiah.veera.statroid.data.Constants;
@@ -40,9 +36,6 @@ public class MainActivity extends AppCompatActivity {
         Statroid.setActivityAlive(true);
         ((Statroid) getApplication()).setCurrentActivity(this);
         db = DBHelper.init(this, READ);
-
-        CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build();
-        Fabric.with(this, new Crashlytics.Builder().core(core).build(), new Crashlytics());
 
         setContentView(R.layout.activity_main);
 
