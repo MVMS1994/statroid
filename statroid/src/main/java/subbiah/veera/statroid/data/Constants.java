@@ -4,6 +4,7 @@ package subbiah.veera.statroid.data;
  * Created by Veera.Subbiah on 16/09/17.
  */
 
+@SuppressWarnings("WeakerAccess")
 public class Constants {
     public static final String CPU = "cpu";
     public static final String RAM = "ram";

@@ -23,6 +23,7 @@ import subbiah.veera.statroid.data.Logger;
  * Created by Veera.Subbiah on 04/09/17.
  */
 
+@SuppressWarnings("unused")
 public class SystemUtils {
     private final static String TAG = "SystemUtils";
 

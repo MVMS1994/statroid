@@ -7,7 +7,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
 
 /**
  * Created by Veera.Subbiah on 16/09/17.
@@ -15,7 +14,7 @@ import java.util.Set;
 
 public class ViewPageAdapter extends FragmentPagerAdapter {
 
-    private ArrayList<Metrics> topics = new ArrayList<>(3);
+    private final ArrayList<Metrics> topics = new ArrayList<>(3);
     private final HashMap<String, Metrics> fragments = new HashMap<>();
 
     public ViewPageAdapter(FragmentManager fm) {
@@ -24,11 +23,7 @@ public class ViewPageAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        if(topics != null) {
-            return topics.get(position);
-        } else {
-            return null;
-        }
+        return topics.get(position);
     }
 
     public void addFragment(Metrics topic, String instrument) {

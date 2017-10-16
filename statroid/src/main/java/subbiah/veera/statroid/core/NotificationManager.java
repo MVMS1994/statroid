@@ -59,7 +59,7 @@ public class NotificationManager {
         if(!builders.containsKey(data.getKey())) {
             int code = (int) (Math.random() * 100);
 
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(application)
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(application, String.valueOf(code))
                     .setSmallIcon(R.drawable.portrait_black_24dp)
                     .setPriority(NotificationCompat.PRIORITY_MAX);
 

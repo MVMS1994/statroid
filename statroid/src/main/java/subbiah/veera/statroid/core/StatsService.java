@@ -1,18 +1,14 @@
 package subbiah.veera.statroid.core;
 
 import android.app.ActivityManager;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.net.TrafficStats;
 import android.os.BatteryManager;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.support.annotation.Nullable;
 
 import java.util.Date;
@@ -104,15 +100,7 @@ public class StatsService extends Service implements Runnable {
         db = null;
         Data.reset();
 
-        // restartService();
         super.onTaskRemoved(rootIntent);
-    }
-
-    private void restartService() {
-        Intent intent = new Intent(getApplicationContext(), StatsService.class);
-        PendingIntent pendingIntent = PendingIntent.getService(this, 1, intent, PendingIntent.FLAG_ONE_SHOT);
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + 500, pendingIntent);
     }
 
     @Nullable
@@ -134,15 +122,7 @@ public class StatsService extends Service implements Runnable {
         }
     }
 
-    @Nullable
-    private Cursor readFromDB() {
-        if(db != null)
-            return db.read(projection, TIME + " > ?", new String[]{"" + (new Date().getTime() - 1000 * 60 * 60)}, TIME);
-
-        return null;
-    }
-
-    private long writeToDB(Data data) {
+    private void writeToDB(Data data) {
         Date date = new Date();
 
         @SuppressWarnings("deprecation") int currentMin = date.getMinutes();
@@ -155,10 +135,9 @@ public class StatsService extends Service implements Runnable {
                 values[1] /= 60.0; // Net
                 values[2] /= 60.0; // CPU
                 prevMinute = currentMin;
-                return db.write(projection, values);
+                db.write(projection, values);
             }
         }
-        return -1;
     }
 
     private void netinfo() {

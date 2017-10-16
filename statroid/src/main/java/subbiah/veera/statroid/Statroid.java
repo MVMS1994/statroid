@@ -10,6 +10,7 @@ import com.squareup.leakcanary.LeakCanary;
  * Created by Veera.Subbiah on 16/09/17.
  */
 
+@SuppressWarnings("unused")
 public class Statroid extends Application {
     private static boolean activityVisible = false;
     private static boolean activityAlive = false;

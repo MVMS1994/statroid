@@ -18,6 +18,7 @@ import static subbiah.veera.statroid.data.Constants.DBConstants.WRITE;
  * Created by Veera.Subbiah on 17/09/17.
  */
 
+@SuppressWarnings("unused")
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "DBHelper";
@@ -62,14 +63,14 @@ public class DBHelper extends SQLiteOpenHelper {
             return null;
     }
 
-    public long write(String[] projection, double[] values) {
-        if(projection.length != values.length) return -1;
+    public void write(String[] projection, double[] values) {
+        if(projection.length != values.length) return;
 
         ContentValues record = new ContentValues();
         for (int i = 0; i < projection.length; i++) {
             record.put(projection[i], values[i]);
         }
-        return db.insert(TABLE_NAME, null, record);
+        db.insert(TABLE_NAME, null, record);
     }
 
     public int remove(String selection, String[] selectionArgs) {
