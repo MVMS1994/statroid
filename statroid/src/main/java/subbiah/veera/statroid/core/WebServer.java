@@ -20,7 +20,7 @@ import subbiah.veera.statroid.data.Logger;
  * Created by Veera.Subbiah on 16/10/17.
  */
 
-public class WebServer implements Runnable {
+class WebServer implements Runnable {
 
     private static final String TAG = "WebServer";
 
@@ -30,17 +30,17 @@ public class WebServer implements Runnable {
 
     private ServerSocket serverSocket;
 
-    public WebServer(int port, Context context) {
+    WebServer(int port, Context context) {
         this.port = port;
         this.context = context;
     }
 
-    public void start() {
+    void start() {
         isRunning = true;
-        new Thread(this).start();
+        //new Thread(this).start();
     }
 
-    public void stop() {
+    void stop() {
         try {
             isRunning = false;
             if (null != serverSocket) {
@@ -50,10 +50,6 @@ public class WebServer implements Runnable {
         } catch (IOException e) {
             Logger.e(TAG, "Error closing the server socket.", e);
         }
-    }
-
-    public int getPort() {
-        return port;
     }
 
     @Override
