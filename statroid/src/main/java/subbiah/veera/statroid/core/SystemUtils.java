@@ -76,7 +76,7 @@ public class SystemUtils {
         return "";
     }
 
-    public static String getIpAddr(Activity activity) {
+    public static String getIpAddr(Context activity) {
         try {
             WifiManager wifiManager = (WifiManager) activity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             ByteBuffer byteBuffer = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(wifiManager.getConnectionInfo().getIpAddress());

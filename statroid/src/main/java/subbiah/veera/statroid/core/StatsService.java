@@ -42,6 +42,8 @@ public class StatsService extends Service implements Runnable {
     private BroadcastReceiver battery;
     @Nullable private DBHelper db = null;
 
+    private WebServer webServer;
+
 
     @Override
     public void onCreate() {
@@ -50,6 +52,8 @@ public class StatsService extends Service implements Runnable {
         db = DBHelper.init(this, WRITE);
         projection = new String[]{TIME, NET, CPU};
         values = new double[]{0, 0, 0};
+        webServer = new WebServer(4000, this);
+        webServer.start();
 
         ActivityManager actManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
@@ -88,6 +92,7 @@ public class StatsService extends Service implements Runnable {
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         shouldStop = true;
+        webServer.stop();
         NotificationManager.reset(this);
         try {
             unregisterReceiver(battery);
@@ -225,5 +230,10 @@ public class StatsService extends Service implements Runnable {
                 }
             }
         }.start();
+    }
+
+    private void startFTPServer() {
+        webServer = new WebServer(4000, this);
+        webServer.start();
     }
 }

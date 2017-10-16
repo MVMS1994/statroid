@@ -39,8 +39,6 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        startFTPServer();
-
         initToolbar();
         initPageViewer();
         initTabLayout();
@@ -89,10 +87,6 @@ public class MainActivity extends AppCompatActivity {
                 .setMessage(adb)
                 .create()
                 .show();
-    }
-
-    private void startFTPServer() {
-
     }
 
     private void setupViewPager() {
