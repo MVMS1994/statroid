@@ -45,7 +45,8 @@
                         android:onClick="onClick"
                         android:padding="16dp"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/ic_refresh_24dp" />
+                        android:src="@drawable/ic_refresh_24dp"
+                        android:visibility="gone" />
 
                     <ImageView
                         android:id="@+id/info"

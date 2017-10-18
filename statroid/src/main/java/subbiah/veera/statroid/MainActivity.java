@@ -109,14 +109,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupViewPager() {
+        viewPageAdapter.addFragment(new Metrics(), Constants.REALTIME);
         viewPageAdapter.addFragment(new Metrics(), Constants.NET);
-        viewPageAdapter.addFragment(new Metrics(), Constants.RAM);
     }
 
     @SuppressWarnings("ConstantConditions")
     private void setupTabIcons(TabLayout tabLayout) {
-        tabLayout.getTabAt(0).setIcon(R.drawable.ic_network_check_black_24dp);
-        tabLayout.getTabAt(1).setIcon(R.drawable.ic_developer_board_black_24dp);
+        tabLayout.getTabAt(0).setIcon(R.drawable.ic_developer_board_black_24dp);
+        tabLayout.getTabAt(1).setIcon(R.drawable.ic_network_check_black_24dp);
     }
 
     private void initTabLayout() {

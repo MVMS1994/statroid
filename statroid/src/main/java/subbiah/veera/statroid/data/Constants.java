@@ -7,6 +7,7 @@ package subbiah.veera.statroid.data;
 @SuppressWarnings("WeakerAccess")
 public class Constants {
     public static final String CPU = "cpu";
+    public static final String REALTIME = "realtime";
     public static final String RAM = "ram";
     public static final String NET = "net_rate";
 
@@ -40,7 +41,7 @@ public class Constants {
     public static class INTERVAL {
         public final int INTERVAL;
         public INTERVAL(String instrument) {
-            if(instrument.equals(RAM)) {
+            if(instrument.equals(REALTIME)) {
                 INTERVAL = 1000;
             } else {
                 INTERVAL = 1000 * 60;

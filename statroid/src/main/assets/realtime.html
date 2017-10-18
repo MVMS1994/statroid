@@ -1,0 +1,168 @@
+<!--<html>-->
+<!--<head>-->
+    <!--<style>-->
+        <!--head, body {-->
+            <!--margin: 0px;-->
+            <!--padding: 0px;-->
+            <!-- -webkit-touch-callout: none; /* iOS Safari */-->
+              <!-- -webkit-user-select: none; /* Safari */-->
+               <!-- -khtml-user-select: none; /* Konqueror HTML */-->
+                 <!-- -moz-user-select: none; /* Firefox */-->
+                  <!-- -ms-user-select: none; /* Internet Explorer/Edge */-->
+                      <!--user-select: none; /* Non-prefixed version, supported by Chrome and Opera */-->
+        <!--}-->
+    <!--</style>-->
+    <!--<title>Ram Usage</title>-->
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+    <!--<script type="text/javascript">-->
+        <!--window.free = 0;-->
+        <!--window.tot = 0;-->
+        <!--window.redraw = function() {-->
+            <!--if(typeof drawChart == "function")-->
+                <!--drawChart();-->
+        <!--}-->
+    <!--</script>-->
+    <!--<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>-->
+    <!--<script type="text/javascript">-->
+        <!--google.charts.load('current', {'packages':['corechart']});-->
+        <!--google.charts.setOnLoadCallback(drawChart);-->
+
+        <!--function drawChart() {-->
+            <!--let temp = "";-->
+            <!--if(typeof window.chart != "undefined") {-->
+                <!--temp = chart.getSelection();-->
+            <!--}-->
+
+            <!--var data = google.visualization.arrayToDataTable([-->
+                <!--['Category', 'Size'],-->
+                <!--['Used',     window.tot - window.free],-->
+                <!--['Free',     window.free]-->
+            <!--]);-->
+
+            <!--var options = {-->
+                <!--title: 'REALTIME Metrics',-->
+                <!--pieHole: 0.4,-->
+                <!--slices: {-->
+                    <!--0: { color: '#2E7D32', textStyle: { color: '#FFFFFF', bold: true } },-->
+                    <!--1: { color: '#A5D6A7', textStyle: { color: '#000000', bold: true } }-->
+                <!--},-->
+                <!--legend: {-->
+                    <!--position: 'bottom',-->
+                    <!--alignment: 'end'-->
+                <!--},-->
+                <!--height: window.innerHeight - 5,-->
+                <!--width: window.innerWidth,-->
+				<!--chartArea: {width: 270, height: 270},-->
+				<!--fontSize: "14",-->
+				<!--tooltip: {-->
+				    <!--trigger: 'selection'-->
+                <!--}-->
+            <!--};-->
+
+            <!--if(typeof window.chart == "undefined")-->
+                <!--window.chart = new google.visualization.PieChart(document.getElementById('piechart'));-->
+
+            <!--window.chart.draw(data, options);-->
+            <!--if(temp != "") {-->
+                <!--chart.setSelection(temp);-->
+            <!--}-->
+        <!--}-->
+    <!--</script>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div id="piechart" style="width: 100%; height: 100%;"></div>-->
+<!--</body>-->
+<!--</html>-->
+
+
+<html>
+<head>
+    <style>
+        head, body {
+            margin: 0px;
+            padding: 0px;
+            -webkit-touch-callout: none; /* iOS Safari */
+              -webkit-user-select: none; /* Safari */
+               -khtml-user-select: none; /* Konqueror HTML */
+                 -moz-user-select: none; /* Firefox */
+                  -ms-user-select: none; /* Internet Explorer/Edge */
+                      user-select: none; /* Non-prefixed version, supported by Chrome and Opera */
+        }
+    </style>
+    <title>Ram Usage</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript">
+        window.ram_free = 1;
+        window.ram_tot = 1;
+        window.cpu_usage = 0;
+
+        window.ram_redraw = function() {
+            if(typeof drawRAMChart == "function")
+                drawRAMChart();
+        }
+
+        window.cpu_redraw = function() {
+            if(typeof drawCPUChart == "function")
+                drawCPUChart();
+        }
+
+        window.options = {
+            redFrom: 87, redTo: 100,
+            yellowFrom:75, yellowTo: 87,
+            animation: {
+                easing: 'inAndOut'
+            }
+        };
+
+        window.onDestroy = function() {
+            if(typeof window.ram_chart != "undefined") {
+                window.ram_chart.clearChart();
+                delete window.ram_chart;
+            }
+
+            if(typeof window.cpu_chart != "undefined") {
+                window.cpu_chart.clearChart();
+                delete window.cpu_chart;
+            }
+        }
+    </script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['gauge']});
+        google.charts.setOnLoadCallback(drawRAMChart);
+
+        function drawRAMChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Label', 'Value'],
+                ['Memory', (window.ram_tot - window.ram_free) * 100/window.ram_tot]
+            ]);
+
+            if(typeof window.ram_chart == "undefined")
+                window.ram_chart = new google.visualization.Gauge(document.getElementById('chart_ram_div'));
+
+            window.ram_chart.draw(data, window.options);
+        }
+    </script>
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['gauge']});
+        google.charts.setOnLoadCallback(drawCPUChart);
+
+        function drawCPUChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Label', 'Value'],
+                ['CPU', window.cpu_usage]
+            ]);
+
+            if(typeof window.cpu_chart == "undefined")
+                window.cpu_chart = new google.visualization.Gauge(document.getElementById('chart_cpu_div'));
+
+            window.cpu_chart.draw(data, window.options);
+        }
+    </script>
+</head>
+
+<body>
+<div id="chart_cpu_div" style="height: 45%; margin:0 auto; width: fit-content;"></div><br />
+<div id="chart_ram_div" style="height: 45%; margin:0 auto; width: fit-content;"></div>
+</body>
+</html>

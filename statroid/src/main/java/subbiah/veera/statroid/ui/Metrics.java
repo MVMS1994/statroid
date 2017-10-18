@@ -34,7 +34,7 @@ import subbiah.veera.statroid.data.Logger;
 import static subbiah.veera.statroid.data.Constants.DBConstants.READ;
 import static subbiah.veera.statroid.data.Constants.DBConstants.TIME;
 import static subbiah.veera.statroid.data.Constants.NET;
-import static subbiah.veera.statroid.data.Constants.RAM;
+import static subbiah.veera.statroid.data.Constants.REALTIME;
 
 /**
  * Created by Veera.Subbiah on 16/09/17.
@@ -58,7 +58,7 @@ public class Metrics extends Fragment implements Runnable {
         instrument = getArguments().getString("instrument", "");
 
         switch (instrument) {
-            case RAM:
+            case REALTIME:
                 return inflater.inflate(R.layout.ram_metrics, container, false);
             case NET:
                 return inflater.inflate(R.layout.net_metrics, container, false);
@@ -73,13 +73,13 @@ public class Metrics extends Fragment implements Runnable {
         super.onViewCreated(view, savedInstanceState);
 
         switch (instrument) {
-            case RAM:
+            case REALTIME:
                 this.view = getActivity().findViewById(R.id.ram_graph);
                 ((WebView) this.view).getSettings().setJavaScriptEnabled(true);
                 ((WebView) this.view).getSettings().setAppCacheEnabled(true);
                 ((WebView) this.view).getSettings().setAppCachePath(getContext().getCacheDir().getPath());
                 ((WebView) this.view).getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
-                ((WebView) this.view).loadUrl("file:///android_asset/ram.html");
+                ((WebView) this.view).loadUrl("file:///android_asset/realtime.html");
                 break;
             case NET:
                 this.view = getActivity().findViewById(R.id.net_graph);
@@ -96,6 +96,7 @@ public class Metrics extends Fragment implements Runnable {
             stopRunning = true;
             runningThread.interrupt();
             runningThread.join();
+            clearGraph();
             db = null;
         } catch (InterruptedException ignored) {} finally {
             if(isRemoving()) {
@@ -120,14 +121,19 @@ public class Metrics extends Fragment implements Runnable {
 
 
 
-
-
+    private void cpuGraph(float usage) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            ((WebView) view).evaluateJavascript(String.format(Locale.US, "window.cpu_usage = %f; if(typeof window.cpu_redraw == \"function\") window.cpu_redraw()", usage), null);
+        } else {
+            ((WebView) view).loadUrl(String.format(Locale.US, "javascript:window.cpu_usage = %f; if(typeof window.cpu_redraw == \"function\") window.cpu_redraw()", usage));
+        }
+    }
 
     private void ramGraph(float free, float tot) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            ((WebView) view).evaluateJavascript(String.format(Locale.US, "window.free = %f; window.tot = %f; if(typeof window.redraw == \"function\") window.redraw()", free, tot), null);
+            ((WebView) view).evaluateJavascript(String.format(Locale.US, "window.ram_free = %f; window.ram_tot = %f; if(typeof window.ram_redraw == \"function\") window.ram_redraw()", free, tot), null);
         } else {
-            ((WebView) view).loadUrl(String.format(Locale.US, "javascript:window.free = %f; window.tot = %f; if(typeof window.redraw == \"function\") window.redraw()", free, tot));
+            ((WebView) view).loadUrl(String.format(Locale.US, "javascript:window.ram_free= %f; window.ram_tot = %f; if(typeof window.ram_redraw == \"function\") window.ram_redraw()", free, tot));
         }
     }
 
@@ -213,7 +219,7 @@ public class Metrics extends Fragment implements Runnable {
             projection[1] = NET;
         }
 
-        if (db != null && !instrument.equals(RAM))
+        if (db != null && !instrument.equals(REALTIME))
             cursor = db.read(projection, TIME + " > ?", new String[]{"" + (new Date().getTime() - 1000 * 60 * 60 * 24 * 7)}, TIME);
 
 
@@ -256,11 +262,26 @@ public class Metrics extends Fragment implements Runnable {
 
     private void drawGraph() {
         switch (instrument) {
-            case RAM:
+            case REALTIME:
                 ramGraph((float) Data.init().getRam(), (float) Data.init().getTotalRam());
+                cpuGraph((float) Data.init().getCpu());
                 break;
             case NET:
                 netGraph();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void clearGraph() {
+        switch (instrument) {
+            case REALTIME:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    ((WebView) view).evaluateJavascript("window.onDestroy()", null);
+                } else {
+                    ((WebView) view).loadUrl("javascript:window.onDestroy()");
+                }
                 break;
             default:
                 break;
