@@ -34,6 +34,21 @@
                         tools:ignore="RelativeOverlap" />
 
                     <ImageView
+                        android:id="@+id/reboot"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toLeftOf="@+id/info"
+                        android:layout_toStartOf="@+id/info"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:contentDescription="@string/refresh"
+                        android:onClick="onClick"
+                        android:padding="16dp"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_refresh_24dp" />
+
+                    <ImageView
+                        android:id="@+id/info"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
@@ -41,7 +56,7 @@
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:clickable="true"
                         android:contentDescription="@string/info"
-                        android:onClick="showInfo"
+                        android:onClick="onClick"
                         android:padding="16dp"
                         android:scaleType="centerCrop"
                         android:src="@drawable/ic_info_black" />

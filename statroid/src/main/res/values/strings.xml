@@ -8,4 +8,5 @@
     <string name="info">info</string>
     <string name="network_used">Network Used</string>
     <string name="day">Day</string>
+    <string name="refresh">refresh</string>
 </resources>

@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.webkit.WebView;
+import android.widget.Toast;
 
 import subbiah.veera.statroid.core.StatsService;
 import subbiah.veera.statroid.core.SystemUtils;
@@ -75,18 +76,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @SuppressWarnings("UnusedParameters")
-    public void showInfo(View view) {
-        String adb = "adb connect " +
-                SystemUtils.getIpAddr(this) + ":" +
-                SystemUtils.runADB("getprop service.adb.tcp.port");
+    public void onClick(View view) {
 
-        new AlertDialog.Builder(this)
-                .setTitle(SystemUtils.getIpAddr(this))
-                .setIcon(R.drawable.ic_router_black_24dp)
-                .setCancelable(true)
-                .setMessage(adb)
-                .create()
-                .show();
+        switch (view.getId()) {
+            case R.id.info:
+                String adb = "adb connect " +
+                        SystemUtils.getIpAddr(this) + ":" +
+                        SystemUtils.runADB("getprop service.adb.tcp.port");
+
+                new AlertDialog.Builder(this)
+                        .setTitle(SystemUtils.getIpAddr(this))
+                        .setIcon(R.drawable.ic_router_black_24dp)
+                        .setCancelable(true)
+                        .setMessage(adb)
+                        .create()
+                        .show();
+                break;
+            case R.id.reboot:
+                new AlertDialog.Builder(this)
+                        .setTitle("Are sure to Reboot?")
+                        .setMessage("This action will cause your device to reboot")
+                        .setCancelable(true)
+                        .setIcon(R.drawable.ic_refresh_24dp)
+                        .setPositiveButton("Yes", (dialogInterface, i) -> Toast.makeText(MainActivity.this, "Feature to be written", Toast.LENGTH_SHORT).show())
+                        .create()
+                        .show();
+                break;
+            default:
+                break;
+        }
+
     }
 
     private void setupViewPager() {

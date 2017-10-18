@@ -229,12 +229,7 @@ public class Metrics extends Fragment implements Runnable {
             setData(time, data);
         }
 
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                drawGraph();
-            }
-        });
+        getActivity().runOnUiThread(this::drawGraph);
     }
 
     @Override
