@@ -87,7 +87,6 @@ public class Metrics extends Fragment implements Runnable {
             default:
                 break;
         }
-        runningThread = runningThread == null || !runningThread.isAlive() ? new Thread(this, "ui_" + instrument) : runningThread;
     }
 
     @Override
@@ -283,6 +282,7 @@ public class Metrics extends Fragment implements Runnable {
 
     private void create() {
         db = DBHelper.init(getContext(), READ);
+        runningThread = runningThread == null || !runningThread.isAlive() ? new Thread(this, "ui_" + instrument) : runningThread;
 
         if (runningThread.isAlive()) runningThread.interrupt();
         else runningThread.start();
