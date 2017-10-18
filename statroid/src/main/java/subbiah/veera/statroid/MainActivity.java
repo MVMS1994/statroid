@@ -1,5 +1,6 @@
 package subbiah.veera.statroid;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -98,7 +99,12 @@ public class MainActivity extends AppCompatActivity {
                         .setMessage("This action will cause your device to reboot")
                         .setCancelable(true)
                         .setIcon(R.drawable.ic_refresh_24dp)
-                        .setPositiveButton("Yes", (dialogInterface, i) -> Toast.makeText(MainActivity.this, "Feature to be written", Toast.LENGTH_SHORT).show())
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                Toast.makeText(MainActivity.this, "Feature to be written", Toast.LENGTH_SHORT).show();
+                            }
+                        })
                         .create()
                         .show();
                 break;
