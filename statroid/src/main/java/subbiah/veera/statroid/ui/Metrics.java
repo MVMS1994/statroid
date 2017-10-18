@@ -87,7 +87,7 @@ public class Metrics extends Fragment implements Runnable {
             default:
                 break;
         }
-        runningThread = runningThread == null ? new Thread(this, "ui_" + instrument) : runningThread;
+        runningThread = runningThread == null || !runningThread.isAlive() ? new Thread(this, "ui_" + instrument) : runningThread;
     }
 
     @Override
@@ -97,6 +97,7 @@ public class Metrics extends Fragment implements Runnable {
             stopRunning = true;
             runningThread.interrupt();
             runningThread.join();
+            db = null;
         } catch (InterruptedException ignored) {} finally {
             if(isRemoving()) {
                 kill();
@@ -274,7 +275,6 @@ public class Metrics extends Fragment implements Runnable {
 
     private void kill() {
         runningThread = null;
-        db = null;
         if(view != null && view instanceof WebView) {
             ((WebView) view).destroy();
             view = null;
@@ -284,10 +284,7 @@ public class Metrics extends Fragment implements Runnable {
     private void create() {
         db = DBHelper.init(getContext(), READ);
 
-        try {
-            if (runningThread.isAlive()) runningThread.interrupt();
-            else runningThread.start();
-        } catch (Exception ignored) {
-        }
+        if (runningThread.isAlive()) runningThread.interrupt();
+        else runningThread.start();
     }
 }
