@@ -18,10 +18,11 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Set;
+import java.util.TreeMap;
 
 import subbiah.veera.statroid.R;
 import subbiah.veera.statroid.core.SystemUtils;
@@ -132,7 +133,12 @@ public class Metrics extends Fragment implements Runnable {
 
     private void netGraph() {
         if(time.length == 0) return;
-        HashMap<String, Float> netReport = new HashMap<>();
+        TreeMap<String, Float> netReport = new TreeMap<>(new Comparator<String>() {
+            @Override
+            public int compare(String s, String t1) {
+                return t1.compareTo(s);
+            }
+        });
 
         for(int i = 0; i < time.length; i++) {
             @SuppressLint("SimpleDateFormat")
@@ -278,7 +284,10 @@ public class Metrics extends Fragment implements Runnable {
     private void create() {
         db = DBHelper.init(getContext(), READ);
 
-        if(runningThread.isAlive()) runningThread.interrupt();
-        else runningThread.start();
+        try {
+            if (runningThread.isAlive()) runningThread.interrupt();
+            else runningThread.start();
+        } catch (Exception ignored) {
+        }
     }
 }
