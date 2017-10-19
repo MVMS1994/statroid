@@ -185,8 +185,8 @@ public class Metrics extends Fragment implements Runnable {
 
         tableHead.addView(getTableHeader(this.getString(R.string.day), rowProps));
         tableHead.addView(getTableHeader(this.getString(R.string.network_used), rowProps));
-        tableHead.addView(getTableHeader(this.getString(R.string.network_upload), rowProps));
         tableHead.addView(getTableHeader(this.getString(R.string.network_download), rowProps));
+        tableHead.addView(getTableHeader(this.getString(R.string.network_upload), rowProps));
 
         tableLayout.addView(tableHead);
 
