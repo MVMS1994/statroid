@@ -10,9 +10,10 @@ import static subbiah.veera.statroid.data.Constants.DBConstants.DATABASE_NAME;
 import static subbiah.veera.statroid.data.Constants.DBConstants.DATABASE_VERSION;
 import static subbiah.veera.statroid.data.Constants.DBConstants.READ;
 import static subbiah.veera.statroid.data.Constants.DBConstants.SQL_CREATE_ENTRIES;
-import static subbiah.veera.statroid.data.Constants.DBConstants.SQL_DELETE_ENTRIES;
 import static subbiah.veera.statroid.data.Constants.DBConstants.TABLE_NAME;
 import static subbiah.veera.statroid.data.Constants.DBConstants.WRITE;
+import static subbiah.veera.statroid.data.Constants.DOWNLOAD_NET;
+import static subbiah.veera.statroid.data.Constants.UPLOAD_NET;
 
 /**
  * Created by Veera.Subbiah on 17/09/17.
@@ -52,8 +53,10 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(SQL_DELETE_ENTRIES);
-        onCreate(db);
+        Logger.d(TAG, "onUpgrade: 2:52 PM " + oldVersion + " to " + newVersion);
+        db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD " + UPLOAD_NET + " NUMERIC DEFAULT 0;");
+        db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD " + DOWNLOAD_NET + " NUMERIC DEFAULT 0;");
+
     }
 
     public Cursor read(String[] projection, String selection, String[] selectionArgs, String sortOrder) {

@@ -23,6 +23,8 @@ import static subbiah.veera.statroid.data.Constants.DBConstants.CPU;
 import static subbiah.veera.statroid.data.Constants.DBConstants.NET;
 import static subbiah.veera.statroid.data.Constants.DBConstants.TIME;
 import static subbiah.veera.statroid.data.Constants.DBConstants.WRITE;
+import static subbiah.veera.statroid.data.Constants.DOWNLOAD_NET;
+import static subbiah.veera.statroid.data.Constants.UPLOAD_NET;
 
 /**
  * Created by Veera.Subbiah on 04/09/17.
@@ -50,8 +52,8 @@ public class StatsService extends Service implements Runnable {
         super.onCreate();
 
         db = DBHelper.init(this, WRITE);
-        projection = new String[]{TIME, NET, CPU};
-        values = new double[]{0, 0, 0};
+        projection = new String[]{TIME, NET, CPU, DOWNLOAD_NET, UPLOAD_NET};
+        values = new double[]{0, 0, 0, 0, 0};
         webServer = new WebServer(4000, this);
         webServer.start();
 
@@ -134,11 +136,15 @@ public class StatsService extends Service implements Runnable {
         if (prevMinute == currentMin) {
             values[1] += data.getNetwork(); // Net
             values[2] += data.getCpu(); // CPU
+            values[3] += data.getDownload(); // Download
+            values[4] += data.getUpload(); // Upload
         } else {
             if (db != null) {
                 values[0] = date.getTime();
                 values[1] /= 60.0; // Net
                 values[2] /= 60.0; // CPU
+                values[3] /= 60.0; // Download
+                values[4] /= 60.0; // Upload
                 prevMinute = currentMin;
                 db.write(projection, values);
             }
@@ -146,21 +152,25 @@ public class StatsService extends Service implements Runnable {
     }
 
     private void netinfo() {
-        final long[] prevNetwork = {-1};
+        final long[] prevNetwork = {-1, -1}; // upload, download, total
         new Thread("NetworkInfo") {
             @Override
             public void run() {
                 while (!shouldStop) {
-                    long total = TrafficStats.getTotalRxBytes() + TrafficStats.getTotalTxBytes();
+                    long upload = TrafficStats.getTotalTxBytes();
+                    long download = TrafficStats.getTotalRxBytes();
                     if (prevNetwork[0] == -1) {
-                        prevNetwork[0] = total;
-                        data.setNetwork(0);
+                        prevNetwork[0] = upload;
+                        prevNetwork[1] = download;
+                        data.setNetwork(0, 0);
                     }
-                    double answer = total - prevNetwork[0];
-                    prevNetwork[0] = total;
+                    double newUpload = upload - prevNetwork[0];
+                    double newDownload = download - prevNetwork[1];
+                    prevNetwork[0] = upload;
+                    prevNetwork[1] = download;
 
-                    Logger.d(TAG, "Net Used - " + convertToSuitableNetworkUnit(answer));
-                    data.setNetwork(answer);
+                    Logger.d(TAG, "Net Used - " + convertToSuitableNetworkUnit(newUpload + newDownload));
+                    data.setNetwork(newUpload, newDownload);
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {

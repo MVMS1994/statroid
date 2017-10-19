@@ -17,11 +17,14 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Locale;
-import java.util.Set;
 import java.util.TreeMap;
 
 import subbiah.veera.statroid.R;
@@ -33,8 +36,10 @@ import subbiah.veera.statroid.data.Logger;
 
 import static subbiah.veera.statroid.data.Constants.DBConstants.READ;
 import static subbiah.veera.statroid.data.Constants.DBConstants.TIME;
+import static subbiah.veera.statroid.data.Constants.DOWNLOAD_NET;
 import static subbiah.veera.statroid.data.Constants.NET;
 import static subbiah.veera.statroid.data.Constants.REALTIME;
+import static subbiah.veera.statroid.data.Constants.UPLOAD_NET;
 
 /**
  * Created by Veera.Subbiah on 16/09/17.
@@ -44,8 +49,7 @@ public class Metrics extends Fragment implements Runnable {
 
     private static final String TAG = "Metrics";
     private String instrument;
-    private double[] data = new double[0];
-    private long[] time = new long[0];
+    private JSONArray data = new JSONArray();
     private volatile boolean stopRunning;
     private Thread runningThread;
 
@@ -138,102 +142,94 @@ public class Metrics extends Fragment implements Runnable {
     }
 
     private void netGraph() {
-        if(time.length == 0) return;
-        TreeMap<String, Float> netReport = new TreeMap<>(new Comparator<String>() {
+        if(data.length() == 0) return;
+        TreeMap<String, JSONObject> netReport = new TreeMap<>(new Comparator<String>() {
             @Override
             public int compare(String s, String t1) {
                 return t1.compareTo(s);
             }
         });
 
-        for(int i = 0; i < time.length; i++) {
-            @SuppressLint("SimpleDateFormat")
-            String day = new SimpleDateFormat("yyyy-MM-dd").format(new Date(time[i]));
-            float curr = netReport.containsKey(day) ? netReport.get(day) : 0;
+        for(int i = 0; i < data.length(); i++) {
+            try {
+                JSONObject datum = data.getJSONObject(i);
+                @SuppressLint("SimpleDateFormat")
+                String day = new SimpleDateFormat("yyyy-MM-dd").format(new Date(datum.getLong(TIME)));
+                JSONObject curr = netReport.containsKey(day) ? netReport.get(day) : new JSONObject();
 
-            netReport.put(day, curr + ((float)data[i] * 60));
+                String[] projections = getProjection(instrument);
+                for(String projection: projections) {
+                    if(projection.equals(TIME)) continue;
+                    double prev = 0;
+                    if(curr.has(projection)) {
+                        prev = curr.getDouble(projection);
+                    }
+                    curr.put(projection, prev + (datum.getDouble(projection) * 60));
+                }
+
+                netReport.put(day, curr);
+            } catch (Exception e) {
+                Logger.e(TAG, "Couldn't read the value", e);
+            }
         }
 
         TableLayout.LayoutParams tableProps = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT);
         TableRow.LayoutParams rowProps = new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 1.0f);
 
+        // ------------------ Add Header ------------------
         TableLayout tableLayout = (TableLayout) view;
         tableLayout.removeAllViews();
 
         TableRow tableHead = new TableRow(this.getContext());
         tableHead.setLayoutParams(tableProps);
 
-        TextView day = new TextView(this.getContext());
-        day.setText(this.getString(R.string.day));
-        day.setGravity(Gravity.CENTER);
-        day.setPadding(5, 5, 5, 5);
-        day.setLayoutParams(rowProps);
-        tableHead.addView(day);
-
-        TextView network_used = new TextView(this.getContext());
-        network_used.setText(this.getString(R.string.network_used));
-        network_used.setGravity(Gravity.CENTER);
-        network_used.setPadding(5, 5, 5, 5);
-        network_used.setLayoutParams(rowProps);
-        tableHead.addView(network_used);
+        tableHead.addView(getTableHeader(this.getString(R.string.day), rowProps));
+        tableHead.addView(getTableHeader(this.getString(R.string.network_used), rowProps));
+        tableHead.addView(getTableHeader(this.getString(R.string.network_upload), rowProps));
+        tableHead.addView(getTableHeader(this.getString(R.string.network_download), rowProps));
 
         tableLayout.addView(tableHead);
 
-        TableRow[] tableRows = new TableRow[netReport.size()];
-        TextView[] key = new TextView[netReport.size()];
-        TextView[] val = new TextView[netReport.size()];
 
-        Set<String> keys = netReport.keySet();
+        // ------------------- Add Body -------------------
+        TableRow tableRows;
+        Iterator<String> keys = netReport.keySet().iterator();
 
-        int i = 0;
-        for(String k: keys) {
-            tableRows[i] = new TableRow(this.getContext());
-            tableRows[i].setLayoutParams(tableProps);
+        for(int i = 0; keys.hasNext(); i++) {
+            String k = keys.next();
+            tableRows = new TableRow(this.getContext());
+            tableRows.setLayoutParams(tableProps);
+            tableRows.setBackgroundColor((i % 2 == 0) ? Color.WHITE : Color.rgb(245, 245, 245));
 
-            key[i] = new TextView(this.getContext());
-            key[i].setText(k);
-            key[i].setTextColor(Color.BLACK);
-            key[i].setPadding(5, 5, 5, 5);
-            key[i].setGravity(Gravity.CENTER);
-            key[i].setLayoutParams(rowProps);
-            tableRows[i].addView(key[i]);
+            tableRows.addView(getTableCell(k, rowProps));
 
-            val[i] = new TextView(this.getContext());
-            val[i].setText(SystemUtils.convertToSuitableNetworkUnit(netReport.get(k)).replace("/s",""));
-            val[i].setTextColor(Color.BLACK);
-            val[i].setPadding(5, 5, 5, 5);
-            val[i].setGravity(Gravity.CENTER);
-            val[i].setLayoutParams(rowProps);
-            tableRows[i].addView(val[i]);
+            JSONObject data = netReport.get(k);
+            Iterator<String> entries = data.keys();
 
-            tableLayout.addView(tableRows[i]);
-            i++;
+            while(entries.hasNext()) {
+                try {
+                    double entry = data.getDouble(entries.next());
+                    tableRows.addView(getTableCell(
+                            SystemUtils.convertToSuitableNetworkUnit(entry).replace("/s", ""),
+                            rowProps
+                    ));
+                } catch (Exception e) {
+                    Logger.e(TAG, "Couldn't read the value", e);
+                }
+            }
+            tableLayout.addView(tableRows);
         }
     }
 
     private void readFromDB() {
-        Cursor cursor = null;
-        String[] projection = new String[2];
-        if(instrument.equals(Constants.NET)) {
-            projection[0] = TIME;
-            projection[1] = NET;
-        }
+        Cursor cursor;
+        String[] projection;
+        JSONArray data;
 
-        if (db != null && !instrument.equals(REALTIME))
-            cursor = db.read(projection, TIME + " > ?", new String[]{"" + (new Date().getTime() - 1000 * 60 * 60 * 24 * 7)}, TIME);
-
-
-        if(cursor != null) {
-            long[] time = new long[cursor.getCount()];
-            double[] data = new double[cursor.getCount()];
-
-            for(int i=0; cursor.moveToNext(); i++) {
-                time[i] = cursor.getLong(0);
-                data[i] = cursor.getDouble(1);
-            }
-
-            setData(time, data);
-        }
+        projection = getProjection(instrument);
+        cursor = getCursor(instrument, projection);
+        data = getData(instrument, projection, cursor);
+        setData(data);
 
         getActivity().runOnUiThread(new Runnable() {
             @Override
@@ -241,6 +237,53 @@ public class Metrics extends Fragment implements Runnable {
                 drawGraph();
             }
         });
+    }
+
+    private String[] getProjection(String instrument) {
+        if(instrument.equals(Constants.NET)) {
+            String[] projection = new String[4];
+            projection[0] = TIME;
+            projection[1] = NET;
+            projection[2] = DOWNLOAD_NET;
+            projection[3] = UPLOAD_NET;
+
+            return projection;
+        } else {
+            return new String[]{};
+        }
+    }
+
+    @Nullable
+    private Cursor getCursor(String instrument, String[] projection) {
+        if (db != null && !instrument.equals(REALTIME))
+            return db.read(projection, TIME + " > ?", new String[]{"" + (new Date().getTime() - 1000 * 60 * 60 * 24 * 7)}, TIME);
+        return null;
+    }
+
+    private JSONArray getData(String instrument, String[] projections, Cursor cursor) {
+        if(cursor != null) {
+            switch (instrument) {
+                case NET:
+                    JSONArray data = new JSONArray();
+
+                    while(cursor.moveToNext()) {
+                        JSONObject datum = new JSONObject();
+                        for(int j = 0; j < projections.length; j++) {
+                            try {
+                                datum.put(projections[j], cursor.getLong(j));
+                            } catch (Exception e) {
+                                Logger.e(TAG, "Couldn't read the value", e);
+                            }
+                        }
+                        data.put(datum);
+                    }
+
+                    return data;
+                default:
+                    break;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -260,9 +303,8 @@ public class Metrics extends Fragment implements Runnable {
 
 
 
-    private void setData(long[] time, double[] data) {
+    private void setData(JSONArray data) {
         this.data = data;
-        this.time = time;
     }
 
     private void drawGraph() {
@@ -307,5 +349,26 @@ public class Metrics extends Fragment implements Runnable {
 
         if (runningThread.isAlive()) runningThread.interrupt();
         else runningThread.start();
+    }
+
+    public View getTableHeader(String text, TableRow.LayoutParams props) {
+        TextView tableHeader = new TextView(this.getContext());
+        tableHeader.setText(text);
+        tableHeader.setPadding(5, 5, 5, 5);
+        tableHeader.setLayoutParams(props);
+        tableHeader.setGravity(Gravity.CENTER);
+
+        return tableHeader;
+    }
+
+    private View getTableCell(String text, TableRow.LayoutParams props) {
+        TextView cell = new TextView(this.getContext());
+        cell.setText(text);
+        cell.setPadding(5, 5, 5, 5);
+        cell.setLayoutParams(props);
+        cell.setTextColor(Color.BLACK);
+        cell.setGravity(Gravity.CENTER);
+
+        return cell;
     }
 }

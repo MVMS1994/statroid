@@ -9,4 +9,6 @@
     <string name="network_used">Network Used</string>
     <string name="day">Day</string>
     <string name="refresh">refresh</string>
+    <string name="network_upload">Uploaded</string>
+    <string name="network_download">Downloaded</string>
 </resources>

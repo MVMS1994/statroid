@@ -13,6 +13,8 @@ public class Data {
     private String key = "NA";
     private double bat = 0;
     private double totalRam;
+    private double upload = 0;
+    private double download = 0;
 
     private Data() {}
 
@@ -56,8 +58,18 @@ public class Data {
         return network;
     }
 
-    public void setNetwork(double network) {
-        this.network = network;
+    public void setNetwork(double upload, double download) {
+        this.upload = upload;
+        this.download = download;
+        this.network = this.upload + this.download;
+    }
+
+    public double getUpload() {
+        return upload;
+    }
+
+    public double getDownload() {
+        return download;
     }
 
     public String getKey() {

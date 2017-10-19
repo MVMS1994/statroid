@@ -10,12 +10,14 @@ public class Constants {
     public static final String REALTIME = "realtime";
     public static final String RAM = "ram";
     public static final String NET = "net_rate";
+    public static final String UPLOAD_NET = "upload_net";
+    public static final String DOWNLOAD_NET = "download_net";
 
     public class DBConstants {
         public static final int READ = 0;
         public static final int WRITE = 1;
 
-        static final int DATABASE_VERSION = 1;
+        static final int DATABASE_VERSION = 2;
         static final String DATABASE_NAME = "Statroid.db";
 
         static final String TABLE_NAME = "status";
@@ -31,11 +33,13 @@ public class Constants {
                         _ID + " INTEGER PRIMARY KEY," +
                         TIME + " NUMERIC," +
                         NET + " NUMERIC," +
+                        UPLOAD_NET + " NUMERIC," +
+                        DOWNLOAD_NET + " NUMERIC," +
                         CPU + " NUMERIC" +
                 ")";
 
         static final String SQL_DELETE_ENTRIES =
-                "DROP TABLE IF EXISTS " + "status";
+                "DROP TABLE IF EXISTS " + TABLE_NAME;
     }
 
     public static class INTERVAL {
