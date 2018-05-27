@@ -1,7 +1,9 @@
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
 
 repositories {
-    maven { url 'https://maven.google.com' }
+    google()
+    maven { url 'https://maven.fabric.io/public' }
 }
 
 
@@ -23,6 +25,12 @@ android {
     }
 
     signingConfigs {
+        debug {
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+        }
         release {
             storeFile file(keystoreProperties['storeFile'])
             storePassword keystoreProperties['storePassword']
@@ -54,4 +62,5 @@ dependencies {
 
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.4'
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+    implementation('com.crashlytics.sdk.android:crashlytics:2.9.3@aar') { transitive = true }
 }

@@ -5,6 +5,8 @@ import android.app.Application;
 import android.support.annotation.Nullable;
 
 import com.squareup.leakcanary.LeakCanary;
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 
 /**
  * Created by Veera.Subbiah on 16/09/17.
@@ -16,8 +18,10 @@ public class Statroid extends Application {
     private static boolean activityAlive = false;
     @Nullable private Activity currentActivity = null;
 
-    @Override public void onCreate() {
+    @Override
+    public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
         if (LeakCanary.isInAnalyzerProcess(this)) {
             return;
         }
