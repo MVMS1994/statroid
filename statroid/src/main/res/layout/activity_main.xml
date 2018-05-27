@@ -45,7 +45,7 @@
                         android:onClick="onClick"
                         android:padding="16dp"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/ic_refresh_24dp"
+                        app:srcCompat="@drawable/ic_refresh_24dp"
                         android:visibility="gone"
                         android:focusable="true" />
 
@@ -61,7 +61,7 @@
                         android:onClick="onClick"
                         android:padding="16dp"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/ic_info_black"
+                        app:srcCompat="@drawable/ic_info_black"
                         android:focusable="true" />
 
                 </RelativeLayout>

@@ -20,6 +20,7 @@ import subbiah.veera.statroid.data.Logger;
  * Created by Veera.Subbiah on 16/10/17.
  */
 
+@SuppressWarnings("unused")
 class WebServer implements Runnable {
 
     private static final String TAG = "WebServer";

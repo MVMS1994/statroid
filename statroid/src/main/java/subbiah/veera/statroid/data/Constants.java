@@ -4,7 +4,7 @@ package subbiah.veera.statroid.data;
  * Created by Veera.Subbiah on 16/09/17.
  */
 
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class Constants {
     public static final String CPU = "cpu";
     public static final String REALTIME = "realtime";

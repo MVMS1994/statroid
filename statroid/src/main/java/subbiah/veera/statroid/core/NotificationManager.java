@@ -5,7 +5,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.widget.RemoteViews;
 
@@ -79,7 +78,6 @@ public class NotificationManager {
         getNotificationManager(activity).cancelAll();
     }
 
-    @NonNull
     private static android.app.NotificationManager getNotificationManager(Context activity) {
         return (android.app.NotificationManager) activity.getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
     }

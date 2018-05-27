@@ -54,12 +54,14 @@ public class StatsService extends Service implements Runnable {
         db = DBHelper.init(this, WRITE);
         projection = new String[]{TIME, NET, CPU, DOWNLOAD_NET, UPLOAD_NET};
         values = new double[]{0, 0, 0, 0, 0};
-        webServer = new WebServer(4000, this);
-        webServer.start();
+        // webServer = new WebServer(4000, this);
+        // webServer.start();
 
         ActivityManager actManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
-        actManager.getMemoryInfo(memInfo);
+        if (actManager != null) {
+            actManager.getMemoryInfo(memInfo);
+        }
 
         NotificationManager.reset(this);
         data = Data.init();
@@ -226,6 +228,8 @@ public class StatsService extends Service implements Runnable {
             public void run() {
                 while (!shouldStop) {
                     ActivityManager actManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+                    if(actManager == null) return;
+
                     ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
                     actManager.getMemoryInfo(memInfo);
                     double total = round(memInfo.availMem / (1024 * 1024 * 1024.0), 2);
@@ -242,6 +246,7 @@ public class StatsService extends Service implements Runnable {
         }.start();
     }
 
+    @SuppressWarnings("unused")
     private void startFTPServer() {
         webServer = new WebServer(4000, this);
         webServer.start();

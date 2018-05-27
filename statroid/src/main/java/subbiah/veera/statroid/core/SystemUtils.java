@@ -1,7 +1,6 @@
 package subbiah.veera.statroid.core;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.wifi.WifiManager;
@@ -62,14 +61,15 @@ public class SystemUtils {
             Process p = Runtime.getRuntime().exec(cmd);
             p.waitFor();
 
-            String line, answer = "";
+            String line;
+            StringBuilder answer = new StringBuilder();
             BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
             while ((line = in.readLine()) != null) {
-                answer += line;
+                answer.append(line);
             }
             in.close();
 
-            return answer;
+            return answer.toString();
         } catch (Exception e) {
             Logger.e(TAG, "This Happened: ", e);
         }
@@ -79,6 +79,7 @@ public class SystemUtils {
     public static String getIpAddr(Context activity) {
         try {
             WifiManager wifiManager = (WifiManager) activity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            if(wifiManager == null) return "";
             ByteBuffer byteBuffer = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(wifiManager.getConnectionInfo().getIpAddress());
 
             return InetAddress.getByAddress(null, byteBuffer.array()).getHostAddress();

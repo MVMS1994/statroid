@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.Gravity;
@@ -58,8 +59,8 @@ public class Metrics extends Fragment implements Runnable {
     private View view;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        instrument = getArguments().getString("instrument", "");
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        instrument = getArguments() != null ? getArguments().getString("instrument", "") : "";
 
         switch (instrument) {
             case REALTIME:
@@ -73,8 +74,9 @@ public class Metrics extends Fragment implements Runnable {
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        if(getActivity() == null || getContext() == null) return;
 
         switch (instrument) {
             case REALTIME:
@@ -222,6 +224,7 @@ public class Metrics extends Fragment implements Runnable {
     }
 
     private void readFromDB() {
+        if(getActivity() == null) return;
         Cursor cursor;
         String[] projection;
         JSONArray data;
@@ -351,7 +354,7 @@ public class Metrics extends Fragment implements Runnable {
         else runningThread.start();
     }
 
-    public View getTableHeader(String text, TableRow.LayoutParams props) {
+    private View getTableHeader(String text, TableRow.LayoutParams props) {
         TextView tableHeader = new TextView(this.getContext());
         tableHeader.setText(text);
         tableHeader.setPadding(5, 5, 5, 5);
