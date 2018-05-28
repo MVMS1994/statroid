@@ -44,7 +44,7 @@ public class StatsService extends Service implements Runnable {
     private BroadcastReceiver battery;
     @Nullable private DBHelper db = null;
 
-    private WebServer webServer;
+    // private WebServer webServer;
 
 
     @Override
@@ -96,7 +96,7 @@ public class StatsService extends Service implements Runnable {
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         shouldStop = true;
-        webServer.stop();
+        // webServer.stop();
         NotificationManager.reset(this);
         try {
             unregisterReceiver(battery);
@@ -248,7 +248,7 @@ public class StatsService extends Service implements Runnable {
 
     @SuppressWarnings("unused")
     private void startFTPServer() {
-        webServer = new WebServer(4000, this);
-        webServer.start();
+        // webServer = new WebServer(4000, this);
+        // webServer.start();
     }
 }
