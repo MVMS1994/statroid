@@ -19,8 +19,8 @@ android {
         applicationId "subbiah.veera.statroid"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 160020200
-        versionName "2.2.0"
+        versionCode 160020201
+        versionName "2.2.1"
         vectorDrawables.useSupportLibrary = true
     }
 
