@@ -1,11 +1,13 @@
 package subbiah.veera.statroid.core;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.os.BuildCompat;
 import android.widget.RemoteViews;
 
 import java.util.HashMap;
@@ -71,7 +73,11 @@ public class NotificationManager {
                 .build();
         mNotification.flags |= Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
 
-        getNotificationManager(activity).notify(codes.get(data.getKey()), mNotification);
+        android.app.NotificationManager manager = getNotificationManager(activity);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            manager.createNotificationChannel(new NotificationChannel(String.valueOf(codes.get(data.getKey())), "statroid", android.app.NotificationManager.IMPORTANCE_DEFAULT));
+        }
+        manager.notify(codes.get(data.getKey()), mNotification);
     }
 
     public static void hideNotifications(Context activity) {
