@@ -75,7 +75,9 @@ public class NotificationManager {
 
         android.app.NotificationManager manager = getNotificationManager(activity);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            manager.createNotificationChannel(new NotificationChannel(String.valueOf(codes.get(data.getKey())), "statroid", android.app.NotificationManager.IMPORTANCE_DEFAULT));
+            NotificationChannel channel = new NotificationChannel(String.valueOf(codes.get(data.getKey())), "statroid", android.app.NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setSound(null, null);
+            manager.createNotificationChannel(channel);
         }
         manager.notify(codes.get(data.getKey()), mNotification);
     }
