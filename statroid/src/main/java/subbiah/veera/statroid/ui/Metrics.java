@@ -96,8 +96,8 @@ public class Metrics extends Fragment implements Runnable {
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onStop() {
+        super.onStop();
         try {
             stopRunning = true;
             runningThread.interrupt();
@@ -112,8 +112,8 @@ public class Metrics extends Fragment implements Runnable {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
         stopRunning = false;
         create();
     }
