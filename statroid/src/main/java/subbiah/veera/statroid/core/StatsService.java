@@ -1,6 +1,8 @@
 package subbiah.veera.statroid.core;
 
 import android.app.ActivityManager;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -110,6 +112,17 @@ public class StatsService extends Service implements Runnable {
         Data.reset();
 
         super.onTaskRemoved(rootIntent);
+
+        PendingIntent service = PendingIntent.getService(
+                getApplicationContext(),
+                1001,
+                new Intent(getApplicationContext(), StatsService.class),
+                PendingIntent.FLAG_ONE_SHOT);
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        if (alarmManager != null) {
+            alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, 100, service);
+        }
     }
 
     @Nullable
@@ -196,16 +209,16 @@ public class StatsService extends Service implements Runnable {
             public void run() {
                 while (!shouldStop) {
                     try {
-                        String rawTop = SystemUtils.runADB("top -n 1 -m 1");
-                        rawTop = rawTop.substring(0, rawTop.indexOf("User", 4));
+                        String rawTop = SystemUtils.runADB("/system/bin/cat /proc/stat");
+                        // rawTop = rawTop.substring(0, rawTop.indexOf("User", 4));
 
-                        String[] entities = rawTop.split(",");
+                        String[] entities = rawTop.split("\n")[0].split("[ ]+");
                         int total = 0;
-                        for (String entity : entities) {
-                            String[] row = entity.split(" ");
-                            int percent = Integer.parseInt(row[row.length - 1].replace("%", ""));
-                            total += percent;
-                        }
+//                        for (String entity : entities) {
+//                            if(entity.equalsIgnoreCase("cpu")) continue;
+//                            int percent = Integer.parseInt(entity);
+//                            total += percent;
+//                        }
                         Logger.d(TAG, "CPU Used - " + total);
                         data.setCpu(total);
 
