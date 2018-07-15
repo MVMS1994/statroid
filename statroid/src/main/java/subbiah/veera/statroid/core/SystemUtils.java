@@ -56,16 +56,18 @@ public class SystemUtils {
         return null;
     }
 
-    public static String runADB(String cmd) {
+    public static String runADB(String... cmd) {
         try {
-            Process p = Runtime.getRuntime().exec(cmd);
+            ProcessBuilder pb = new ProcessBuilder(cmd);
+            Process p = pb.start();
+            // p = Runtime.getRuntime().exec(cmd);
             p.waitFor();
 
             String line;
             StringBuilder answer = new StringBuilder();
             BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
             while ((line = in.readLine()) != null) {
-                answer.append(line);
+                answer.append(line).append(System.getProperty("line.separator"));
             }
             in.close();
 

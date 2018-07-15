@@ -209,18 +209,23 @@ public class StatsService extends Service implements Runnable {
             public void run() {
                 while (!shouldStop) {
                     try {
-                        String rawTop = SystemUtils.runADB("/system/bin/cat /proc/stat");
+                        String rawTop = SystemUtils.runADB("/system/bin/cat", "/proc/stat");
                         // rawTop = rawTop.substring(0, rawTop.indexOf("User", 4));
 
                         String[] entities = rawTop.split("\n")[0].split("[ ]+");
-                        int total = 0;
-//                        for (String entity : entities) {
-//                            if(entity.equalsIgnoreCase("cpu")) continue;
-//                            int percent = Integer.parseInt(entity);
-//                            total += percent;
-//                        }
-                        Logger.d(TAG, "CPU Used - " + total);
-                        data.setCpu(total);
+                        long total = 0;
+                        double idle = 0;
+                        for (String entity : entities) {
+                            if(entity.equalsIgnoreCase("cpu")) continue;
+                            int percent = Integer.parseInt(entity);
+                            total += percent;
+                        }
+                        if(entities.length >= 5) {
+                            idle = Integer.parseInt(entities[4]);
+                        }
+
+                        Logger.d(TAG, "CPU Used - " + (idle * 100) / total);
+                        data.setCpu(SystemUtils.round((idle * 100) / total, 2));
 
                         try {
                             Thread.sleep(1000);
