@@ -15,6 +15,7 @@ import android.support.annotation.Nullable;
 
 import java.util.Date;
 
+import subbiah.veera.statroid.data.Constants;
 import subbiah.veera.statroid.data.DBHelper;
 import subbiah.veera.statroid.data.Data;
 import subbiah.veera.statroid.data.Logger;
@@ -187,7 +188,7 @@ public class StatsService extends Service implements Runnable {
                     Logger.d(TAG, "Net Used - " + convertToSuitableNetworkUnit(newUpload + newDownload));
                     data.setNetwork(newUpload, newDownload);
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(Constants.THREAD_SLEEP);
                     } catch (InterruptedException e) {
                         Logger.e(TAG, "This Happened: ", e);
                     }
@@ -209,26 +210,19 @@ public class StatsService extends Service implements Runnable {
             public void run() {
                 while (!shouldStop) {
                     try {
-                        String rawTop = SystemUtils.runADB("/system/bin/cat", "/proc/stat");
-                        // rawTop = rawTop.substring(0, rawTop.indexOf("User", 4));
-
-                        String[] entities = rawTop.split("\n")[0].split("[ ]+");
-                        long total = 0;
-                        double idle = 0;
-                        for (String entity : entities) {
-                            if(entity.equalsIgnoreCase("cpu")) continue;
-                            int percent = Integer.parseInt(entity);
-                            total += percent;
+                        int processors = Runtime.getRuntime().availableProcessors();
+                        double avgFreq = 0;
+                        for (int i = 0; i < processors; i++) {
+                            long currFreq = Long.parseLong(SystemUtils.runADB("/system/bin/cat", "/sys/devices/system/cpu/cpu" + i + "/cpufreq/scaling_cur_freq").split("\n")[0]);
+                            long totFreq = Long.parseLong(SystemUtils.runADB("/system/bin/cat", "/sys/devices/system/cpu/cpu" + i + "/cpufreq/scaling_max_freq").split("\n")[0]);
+                            avgFreq += (currFreq * 100.0 / totFreq);
                         }
-                        if(entities.length >= 5) {
-                            idle = Integer.parseInt(entities[4]);
-                        }
+                        avgFreq /= processors;
 
-                        Logger.d(TAG, "CPU Used - " + (idle * 100) / total);
-                        data.setCpu(SystemUtils.round((idle * 100) / total, 2));
-
+                        data.setCpu(avgFreq);
+                        Logger.d(TAG, "CPU Used - " + avgFreq);
                         try {
-                            Thread.sleep(1000);
+                            Thread.sleep(Constants.THREAD_SLEEP);
                         } catch (InterruptedException e) {
                             Logger.e(TAG, "This Happened: ", e);
                         }
@@ -255,7 +249,7 @@ public class StatsService extends Service implements Runnable {
 
                     data.setRam(total);
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(Constants.THREAD_SLEEP);
                     } catch (InterruptedException e) {
                         Logger.e(TAG, "This Happened: ", e);
                     }

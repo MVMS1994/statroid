@@ -14,13 +14,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.Toast;
-
 import subbiah.veera.statroid.core.StatsService;
 import subbiah.veera.statroid.core.SystemUtils;
 import subbiah.veera.statroid.data.Constants;
 import subbiah.veera.statroid.data.DBHelper;
 import subbiah.veera.statroid.ui.Metrics;
 import subbiah.veera.statroid.ui.ViewPageAdapter;
+import subbiah.veera.statroid.R;
 
 import static subbiah.veera.statroid.data.Constants.DBConstants.READ;
 

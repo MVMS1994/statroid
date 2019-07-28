@@ -12,6 +12,7 @@ public class Constants {
     public static final String NET = "net_rate";
     public static final String UPLOAD_NET = "upload_net";
     public static final String DOWNLOAD_NET = "download_net";
+    public static final int THREAD_SLEEP = 2000;
 
     public class DBConstants {
         public static final int READ = 0;
