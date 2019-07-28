@@ -12,6 +12,7 @@ import android.net.TrafficStats;
 import android.os.BatteryManager;
 import android.os.IBinder;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import androidx.annotation.Nullable;
@@ -215,9 +216,12 @@ public class StatsService extends Service implements Runnable {
                         for (int i = 0; i < processors; i++) {
                             long currFreq = Long.parseLong(SystemUtils.runADB("/system/bin/cat", "/sys/devices/system/cpu/cpu" + i + "/cpufreq/scaling_cur_freq").split("\n")[0]);
                             long totFreq = Long.parseLong(SystemUtils.runADB("/system/bin/cat", "/sys/devices/system/cpu/cpu" + i + "/cpufreq/scaling_max_freq").split("\n")[0]);
-                            avgFreq += (currFreq * 100.0 / totFreq);
+                            long minFreq = Long.parseLong(SystemUtils.runADB("/system/bin/cat", "/sys/devices/system/cpu/cpu" + i + "/cpufreq/scaling_min_freq").split("\n")[0]);
+                            avgFreq += ((currFreq - minFreq) * 100.0 / (totFreq - minFreq));
                         }
-                        avgFreq /= processors;
+                        avgFreq = new BigDecimal(avgFreq/processors)
+                                .setScale(2, BigDecimal.ROUND_HALF_DOWN)
+                                .doubleValue();
 
                         data.setCpu(avgFreq);
                         Logger.d(TAG, "CPU Used - " + avgFreq);
