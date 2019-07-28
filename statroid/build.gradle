@@ -19,24 +19,9 @@ android {
         applicationId "subbiah.veera.statroid"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 160020202
-        versionName "2.2.2"
+        versionCode 1627020203
+        versionName "2.2.3"
         vectorDrawables.useSupportLibrary = true
-    }
-
-    signingConfigs {
-        debug {
-            storeFile file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['storePassword']
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-        }
-        release {
-            storeFile file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['storePassword']
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-        }
     }
 
     buildTypes {
@@ -44,7 +29,6 @@ android {
             // debuggable true
             minifyEnabled true
             shrinkResources true
-            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
