@@ -5,7 +5,10 @@ import android.app.Application;
 
 
 import androidx.annotation.Nullable;
+import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.core.CrashlyticsCore;
 import com.squareup.leakcanary.LeakCanary;
+import io.fabric.sdk.android.Fabric;
 
 /**
  * Created by Veera.Subbiah on 16/09/17.
@@ -20,6 +23,7 @@ public class Statroid extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics.Builder().core(new CrashlyticsCore.Builder().build()).build());
         if (LeakCanary.isInAnalyzerProcess(this)) {
             return;
         }
