@@ -41,10 +41,6 @@
                 <action android:name="ACTION_EXTERNAL_APPLICATIONS_AVAILABLE" />
             </intent-filter>
         </receiver>
-
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="7ff6472d68523a5c2226f8913df363276715fe63" />
     </application>
 
 </manifest>

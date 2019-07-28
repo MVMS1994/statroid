@@ -11,10 +11,10 @@ import android.content.IntentFilter;
 import android.net.TrafficStats;
 import android.os.BatteryManager;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
 
 import java.util.Date;
 
+import androidx.annotation.Nullable;
 import subbiah.veera.statroid.data.Constants;
 import subbiah.veera.statroid.data.DBHelper;
 import subbiah.veera.statroid.data.Data;

@@ -1,9 +1,10 @@
 package subbiah.veera.statroid.ui;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,11 +18,12 @@ public class ViewPageAdapter extends FragmentPagerAdapter {
     private final ArrayList<Metrics> topics = new ArrayList<>(3);
     private final HashMap<String, Metrics> fragments = new HashMap<>();
 
-    public ViewPageAdapter(FragmentManager fm) {
-        super(fm);
+    public ViewPageAdapter(@NonNull FragmentManager fm) {
+        super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
     }
 
     @Override
+    @NonNull
     public Fragment getItem(int position) {
         return topics.get(position);
     }

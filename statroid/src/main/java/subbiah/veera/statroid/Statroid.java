@@ -2,11 +2,10 @@ package subbiah.veera.statroid;
 
 import android.app.Activity;
 import android.app.Application;
-import android.support.annotation.Nullable;
 
+
+import androidx.annotation.Nullable;
 import com.squareup.leakcanary.LeakCanary;
-import com.crashlytics.android.Crashlytics;
-import io.fabric.sdk.android.Fabric;
 
 /**
  * Created by Veera.Subbiah on 16/09/17.
@@ -21,9 +20,6 @@ public class Statroid extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        if(!BuildConfig.DEBUG) {
-            Fabric.with(this, new Crashlytics());
-        }
         if (LeakCanary.isInAnalyzerProcess(this)) {
             return;
         }

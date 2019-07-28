@@ -6,13 +6,12 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.os.BuildCompat;
 import android.widget.RemoteViews;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import androidx.core.app.NotificationCompat;
 import subbiah.veera.statroid.MainActivity;
 import subbiah.veera.statroid.R;
 import subbiah.veera.statroid.Statroid;
